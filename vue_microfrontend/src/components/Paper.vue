@@ -45,7 +45,7 @@ export default {
       sk.strokeWeight(b);
         if (h > 2) {
           sk.push();    // Save the current state of transformation (i.e. where are we now)
-          sk.rotate(theta);   // Rotate by theta
+          sk.rotate(-3*theta + theta);   // Rotate by theta
           sk.line(0, 0, 0, -h);  // Draw the branch
           sk.translate(0, -h); // Move to the end of the branch
           branch(sk, h, level,b);
@@ -53,15 +53,15 @@ export default {
 
           // Repeat the same thing, only branch off to the "left" this time!
           sk.push();
-          sk.rotate(-theta);
-          sk.line(0, 0, 0, -h);
+          sk.rotate(sk.mouseY/sk.height * 3.14);
+          sk.line(0, 0, 0, h);
           sk.translate(0, -h);
           branch(sk, h, level,b);
           sk.pop();
           
           // Repeat the same thing, only branch off to the "left" this time!
           sk.push();
-          sk.rotate(3*theta);
+          sk.rotate(3*theta + theta);
           sk.line(0, 0, 0, -h);
           sk.translate(0, -h);
           branch(sk, h ,level,b);
