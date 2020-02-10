@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+
+  
+
+  <title>MicroFrontend</title>
+  <link rel="stylesheet" href="https://unpkg.com/bulma@0.7.5/css/bulma.min.css" />
+  <style>
+html, body {
+    background-color:rgba(79,195,247 ,1);
+    text-align:center;
+}
+  </style>
+
+</head>
+
+<body>
+  <!-- <section class="hero is-info is-fullheight">
+
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <div class="column is-8 is-offset-2 "> -->
+          <div id='cake'>
+          </div>
+        <!-- </div>
+      </div>
+    </div> -->
+
+    <!-- <div class="hero-foot">
+      <div class="container">
+        <div class="tabs is-centered"> -->
+          <ul>
+            <li><a>ColdLambda</a></li>
+          </ul>
+        <!-- </div>
+      </div>
+    </div> -->
+
+  </section>
+
+  <script>
+    
+    var script = document.createElement('script');
+    script.src = 'http://localhost:1111/microfrontend.js';
+    document.head.appendChild(script);
+    document.getElementById('cake').appendChild(document.createElement('cake-ui'));
+  </script>
+</body>
+
+
+</html>

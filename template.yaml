@@ -1,0 +1,158 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+   
+Globals:
+    Function:
+        Timeout: 15
+
+
+Parameters:
+        ServiceSubDomainName:
+            Type: String
+            Default: 'cake'
+
+        RootUrl:
+            Type: String
+            Default: '{{resolve:ssm:/account/root-url:1}}'
+
+        SslCert: 
+            Type: String
+            Default: '{{resolve:ssm:/account/ssl-cert:1}}'
+        
+        SkillName:
+            Type: String
+            Default: 'SellerDigital'
+
+        BucketName:
+            Type: String
+            Default: ''
+        
+        Environment:
+            Type: String
+            Default: 'acceptance'
+
+        Namespace:
+            Type: String
+            Default: ''
+        
+Conditions: 
+      Acceptance: !Equals [ !Ref Environment, 'acceptance' ]
+
+Resources: 
+    ServiceApi:
+        Type: AWS::Serverless::Api
+        Properties:
+            Name: ServiceApi
+            StageName: 'Prod'
+            Cors:
+                AllowMethods: "'*'"
+                AllowHeaders: "'*'"
+                AllowOrigin: "'*'"
+
+    APIDomainName:
+        Type: AWS::ApiGateway::DomainName
+        Properties:
+          RegionalCertificateArn: !Ref SslCert
+          DomainName: !Join [ '', [ !Ref ServiceSubDomainName, !Ref Namespace, '.', !Ref RootUrl ] ]
+          EndpointConfiguration:
+            Types: ['REGIONAL']
+
+    APIBasePathMapping:
+        Type: AWS::ApiGateway::BasePathMapping
+        DependsOn: APIDomainName
+        Properties:
+            Stage: !Ref ServiceApi.Stage
+            DomainName: !Ref APIDomainName
+            RestApiId: !Ref ServiceApi
+
+    APIDomain:
+        Type: AWS::Route53::RecordSetGroup
+        DependsOn: APIDomainName
+        Properties:
+          HostedZoneName: !Join [ '', [ !Ref RootUrl, '.' ] ]
+          RecordSets:
+          - Name: !Ref APIDomainName
+            Type: A
+            AliasTarget:
+              DNSName: !GetAtt [APIDomainName, RegionalDomainName]
+              HostedZoneId: !GetAtt [APIDomainName, RegionalHostedZoneId]
+    
+    # UiLambdaFunctionVersion: 
+    #     Type: AWS::Lambda::Version
+    #     Properties: 
+    #         FunctionName: !Ref UiLambdaFunction
+    
+    UiLambdaFunction:
+            Type: AWS::Serverless::Function
+            Properties:
+                MemorySize: 3008
+                Description: Serves microfrontend and shell html container
+                CodeUri: ui/
+                Handler: ui.lambda_handler
+                Runtime: nodejs10.x
+                Environment:
+                    Variables:
+                        ServiceUrl: !Join [ '', [ 'https://', !Ref ServiceSubDomainName, !Ref Namespace, '.', !Ref RootUrl ] ]
+                        RootUrl: !Ref RootUrl
+                Events:
+                    Get:
+                        Type: Api
+                        Properties:
+                            Path: /
+                            RestApiId: !Ref ServiceApi
+                            Method: GET
+                            # Auth:
+                            #     Authorizer: CognitoAuthorizer
+                            
+    ServiceApiFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            MemorySize: 3008
+            CodeUri: service/
+            Handler: service.lambda_handler
+            Runtime: nodejs10.x
+            Environment:
+                Variables:
+                    RootUrl: !Ref RootUrl
+                    Namespace: !Ref Namespace
+            # Policies:
+            # - Statement:
+            #     [{
+            #       "Effect": "Allow",
+            #       "Action": ["es:*","lambda:*","apigateway:*","s3:*","dynamodb:*"],
+            #       "Resource": "*"
+            #     }]
+            Events:
+                ApiGets:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref ServiceApi
+                        Path: /{resource}/{method}
+                        Method: get
+                        # Auth:
+                            #     Authorizer: CognitoAuthorizer
+                ApiPosts:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref ServiceApi
+                        Path: /{resource}/{method}
+                        Method: post
+                        # Auth:
+                            #     Authorizer: CognitoAuthorizer
+                ApiOptions:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref ServiceApi
+                        Path: /{resource}/{method}
+                        Method: options
+                        # Auth:
+                            #     Authorizer: CognitoAuthorizer
+
+                        
+Outputs:
+    APIDomainName:
+        Description: "Api Domain Name"
+        Value: !Ref APIDomainName
+    ApiUrl:
+        Description: The API URL
+        Value: !Sub "https://${ServiceApi}.execute-api.${AWS::Region}.amazonaws.com/"

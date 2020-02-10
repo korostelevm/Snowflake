@@ -1,0 +1,9 @@
+{
+    "execTimeout": 60000,
+    "taskTimeout": 60000,
+    "defaultCommandTimeout": 20000,
+    "pageLoadTimeout": 200000,
+    "responseTimeout": 30000,
+    "chromeWebSecurity": false
+  }
+  

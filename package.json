@@ -1,0 +1,37 @@
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "config": {
+    "bucket": "cold-lambda"
+  },
+  "scripts": {
+    "install-all": "npm run install:dev && npm run install:lambda && npm run install:vue && npm run install:service ",
+    "install:dev": "npm i",
+    "install:service": "cd service && npm i",
+    "install:lambda": "cd ui && npm i",
+    "install:vue": "cd vue_microfrontend && npm i",
+    "start": "concurrently  \"npm run start:shell\"  \"npm run start:microfrontend\"  \"npm run start:localhost\"  \"nodemon\"",
+    "start:localhost": "node_modules/http-server/bin/http-server",
+    "start:shell": "sleep 3  && open http://localhost:8080/",
+    "start:auth": "cd vue && webpack-dev-server --config ./webpack.dev.js --port 2222",
+    "start:microfrontend": "cd vue_microfrontend && webpack-dev-server --config ./webpack.dev.js --port 1111",
+    "build": "./build_before",
+    "deploy": "npm run build && npm run deploy:package && npm run deploy:deploy",
+    "deploy:package": "sam package --template-file template.yaml --use-json --s3-bucket $npm_package_config_bucket --s3-prefix ${PWD##*/} --output-template-file ${PWD##*/}.json",
+    "deploy:deploy": "sam deploy --template-file ${PWD##*/}.json --stack-name ${PWD##*/} --capabilities CAPABILITY_IAM "
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/plugin-syntax-dynamic-import": "7.0.0",
+    "@babel/preset-env": "^7.4.3",
+    "body-parser": "^1.19.0",
+    "concurrently": "4.0.1",
+    "express": "^4.17.1",
+    "http-server": "^0.11.1",
+    "nodemon": "^1.19.2",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.8.0"
+  }
+}
