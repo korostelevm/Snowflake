@@ -22,7 +22,11 @@ export default {
   },
   methods: {
     setup(sketch) {
-            sketch.createCanvas(1000, 1000);
+            sketch.createCanvas(window.innerWidth,window.innerHeight);
+            window.onresize = function(){
+                sketch.resizeCanvas(window.innerWidth,window.innerHeight);
+            }
+            
 
       // sketch.background('green');
       // sketch.text('Hello p5!', 20, 20);
@@ -33,40 +37,57 @@ export default {
         // sk.line(sk.pmouseX, sk.pmouseY, sk.mouseX, sk.mouseY);
         function branch(sk,h,level, b) {
         // Each branch will be 2/3rds the size of the previous one
-          h *= 0.66;
+          h *= 0.86;
           
           level +=1
         // All recursive functions must have an exit condition!!!!
         // Here, ours is when the length of the branch is 2 pixels or less
-        if (level > 7){
+        if (level > 5){
           return
         }
-      b = b * 0.75
-      sk.strokeWeight(b);
-        if (h > 2) {
+        
+        h = h*( (sk.mouseY / (sk.height/2)))
+          b = b * 0.6
+          sk.strokeWeight(b);
+          sk.stroke('rgba(255,255,255,'+(6-level)/3+')')
+        // if (h > 2) {
+          sk.push();    
+          sk.noFill();
+          sk.arc(0, 0, 1000/(50*(sk.mouseY / sk.height)), 1000/(50*(sk.mouseY / sk.height)), ((sk.mouseX / sk.height))*2*sk.PI, ((sk.mouseX / sk.height))* sk.PI);
+          sk.pop();    
+          
           sk.push();    // Save the current state of transformation (i.e. where are we now)
-          sk.rotate(-3*theta + theta);   // Rotate by theta
+          sk.rotate(theta);   // Rotate by theta
           sk.line(0, 0, 0, -h);  // Draw the branch
           sk.translate(0, -h); // Move to the end of the branch
           branch(sk, h, level,b);
           sk.pop();     // Whenever we get back here, we "pop" in order to restore the previous matrix state
 
-          // Repeat the same thing, only branch off to the "left" this time!
+          // // Repeat the same thing, only branch off to the "left" this time!
           sk.push();
-          sk.rotate(sk.mouseY/sk.height * 3.14);
-          sk.line(0, 0, 0, h);
+          sk.rotate(-theta);
+          sk.line(0, 0, 0, -h);
           sk.translate(0, -h);
           branch(sk, h, level,b);
           sk.pop();
           
-          // Repeat the same thing, only branch off to the "left" this time!
+          // // Repeat the same thing, only branch off to the "left" this time!
           sk.push();
-          sk.rotate(3*theta + theta);
+          sk.rotate(3*theta);
+          sk.line(0, 0, 0, -h);
+          sk.translate(0, -h);
+
+          branch(sk, h ,level,b);
+          sk.pop();
+          
+          // // Repeat the same thing, only branch off to the "left" this time!
+          sk.push();
+          sk.rotate(-3*theta);
           sk.line(0, 0, 0, -h);
           sk.translate(0, -h);
           branch(sk, h ,level,b);
           sk.pop();
-        }
+        // }
         
         
       }
@@ -78,7 +99,7 @@ export default {
         sk.strokeWeight(b);
 
         // Let's pick an angle 0 to 90 degrees based on the mouse position
-        let a = (sk.mouseX / sk.width) * 90;
+        let a = (sk.mouseX / (sk.width)) * 90;
         
         // Convert it to radians
         theta = sk.radians(a);
@@ -87,7 +108,7 @@ export default {
         // Draw a line 120 pixels
         // sk.line(0,0,0,-120);
         // Move to the end of that line
-        // sk.translate(0,-120);
+        sk.translate(0,-120);
         // Start the recursive branching!
         var level = 0
         branch(sk, 320, level, b);
