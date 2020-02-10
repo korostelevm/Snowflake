@@ -1,7 +1,7 @@
 <template>
   <div class='cool'>
     <div class="">
-      <div class='cakes'>
+      <div class='snowflake'>
         <Paper/>
       </div>
     </div>
@@ -9,16 +9,10 @@
 </template>
 
 <script>
-var cakes = [
-  {
-    name:'Cake'
-  },
-]
 export default {
   name: 'microfrontend',
   data() {
     return {
-          cakes:cakes,
           init:false
           }
   },

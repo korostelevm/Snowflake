@@ -24,4 +24,4 @@ Vue.mixin({
   }
 })
 
-Vue.customElement('cake-ui', App);
+Vue.customElement('snowflake-ui', App);

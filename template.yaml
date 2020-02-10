@@ -9,7 +9,7 @@ Globals:
 Parameters:
         ServiceSubDomainName:
             Type: String
-            Default: 'cake'
+            Default: 'snowflake'
 
         RootUrl:
             Type: String
