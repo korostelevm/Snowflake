@@ -40,7 +40,7 @@ export default {
     },
     branch(sk,h,level, b) {
         // Each branch will be 2/3rds the size of the previous one
-          h *= (0.76 + (0.1*(Math.sin(Date.now()/1000)))) ;
+          h *= (0.76 + (0.1*(Math.sin(Date.now()/2000)))) ;
           level +=1
         // All recursive functions must have an exit condition!!!!
         // Here, ours is when the length of the branch is 2 pixels or less
