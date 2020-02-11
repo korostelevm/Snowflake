@@ -38,11 +38,7 @@ export default {
       // sketch.background('green');
       // sketch.text('Hello p5!', 20, 20);
     },
-      draw(sk) {
-        // draw a line between the previous
-        // and the current mouse position
-        // sk.line(sk.pmouseX, sk.pmouseY, sk.mouseX, sk.mouseY);
-        function branch(sk,h,level, b) {
+    branch(sk,h,level, b) {
         // Each branch will be 2/3rds the size of the previous one
           h *= 0.86;
           
@@ -57,9 +53,8 @@ export default {
           b = b * 0.6
           sk.strokeWeight(b);
           var color = Math.floor(255-((distance / 1000)*255))
-          console.log(color)
           sk.stroke('rgba(255,255,'+color+','+(6-level)/4+')')
-        // if (h > 2) {
+        if (h > 20) {
 
           sk.push();    
           sk.noFill();
@@ -70,7 +65,7 @@ export default {
           sk.rotate(theta);   // Rotate by theta
           sk.line(0, 0, 0, -h);  // Draw the branch
           sk.translate(0, -h); // Move to the end of the branch
-          branch(sk, h, level,b);
+          this.branch(sk, h, level,b);
           sk.pop();     // Whenever we get back here, we "pop" in order to restore the previous matrix state
 
           // // Repeat the same thing, only branch off to the "left" this time!
@@ -78,7 +73,7 @@ export default {
           sk.rotate(-theta);
           sk.line(0, 0, 0, -h);
           sk.translate(0, -h);
-          branch(sk, h, level,b);
+          this.branch(sk, h, level,b);
           sk.pop();
           
           // // Repeat the same thing, only branch off to the "left" this time!
@@ -87,7 +82,7 @@ export default {
           sk.line(0, 0, 0, -h);
           sk.translate(0, -h);
 
-          branch(sk, h ,level,b);
+          this.branch(sk, h ,level,b);
           sk.pop();
           
           // // Repeat the same thing, only branch off to the "left" this time!
@@ -95,12 +90,16 @@ export default {
           sk.rotate(-3*theta);
           sk.line(0, 0, 0, -h);
           sk.translate(0, -h);
-          branch(sk, h ,level,b);
+          this.branch(sk, h ,level,b);
           sk.pop();
-        // }
+        }
+        return
         
-        
-      }
+      },
+      draw(sk) {
+        // draw a line between the previous
+        // and the current mouse position
+        // sk.line(sk.pmouseX, sk.pmouseY, sk.mouseX, sk.mouseY);
       distance  = Math.sqrt(Math.pow(sk.mouseX - sk.width/2,2) + Math.pow(sk.mouseY - sk.height/2,2))
         
         var color = Math.floor(255-((distance / 1000)*255))
@@ -126,7 +125,7 @@ export default {
         sk.translate(0,0);
         // Start the recursive branching!
         var level = 0
-        branch(sk, 300, level, b);
+        this.branch(sk, 300, level, b);
       },
       keypressed(sk) {
         // convert the key code to it's string
