@@ -9,6 +9,9 @@
 </template>
 <script>
 var theta
+var distance
+var mic
+var fft
 import VueP5 from 'vue-p5';
 export default {
   name: 'Paper',
@@ -26,6 +29,10 @@ export default {
             window.onresize = function(){
                 sketch.resizeCanvas(window.innerWidth,window.innerHeight);
             }
+            console.log(VueP5)
+            console.log(sketch)
+            // mic.start();
+            // fft.setInput(mic);
             
 
       // sketch.background('green');
@@ -49,8 +56,11 @@ export default {
         h = h*( (sk.mouseY / (sk.height/2)))
           b = b * 0.6
           sk.strokeWeight(b);
-          sk.stroke('rgba(255,255,255,'+(6-level)/3+')')
+          var color = Math.floor(255-((distance / 1000)*255))
+          console.log(color)
+          sk.stroke('rgba(255,255,'+color+','+(6-level)/4+')')
         // if (h > 2) {
+
           sk.push();    
           sk.noFill();
           sk.arc(0, 0, 1000/(50*(sk.mouseY / sk.height)), 1000/(50*(sk.mouseY / sk.height)), ((sk.mouseX / sk.height))*2*sk.PI, ((sk.mouseX / sk.height))* sk.PI);
@@ -91,15 +101,20 @@ export default {
         
         
       }
+      distance  = Math.sqrt(Math.pow(sk.mouseX - sk.width/2,2) + Math.pow(sk.mouseY - sk.height/2,2))
+        
+        var color = Math.floor(255-((distance / 1000)*255))
+        sk.background('rgba('+(255-color)+',195,247 ,1)');
 
-        sk.background('rgba(79,195,247 ,1)');
+
+
+        // sk.background('rgba(79,195,247 ,1)');
         sk.frameRate(30);
         sk.stroke(255);
         let b = (sk.mouseY)/30
         sk.strokeWeight(b);
-
         // Let's pick an angle 0 to 90 degrees based on the mouse position
-        let a = (sk.mouseX / (sk.width)) * 90;
+        let a = ((sk.mouseX + 600) / (sk.width)) * 90;
         
         // Convert it to radians
         theta = sk.radians(a);
@@ -108,10 +123,10 @@ export default {
         // Draw a line 120 pixels
         // sk.line(0,0,0,-120);
         // Move to the end of that line
-        sk.translate(0,-120);
+        sk.translate(0,0);
         // Start the recursive branching!
         var level = 0
-        branch(sk, 320, level, b);
+        branch(sk, 300, level, b);
       },
       keypressed(sk) {
         // convert the key code to it's string
