@@ -9,7 +9,7 @@ Globals:
 Parameters:
         ServiceSubDomainName:
             Type: String
-            Default: 'snowflake'
+            Default: 'www'
 
         RootUrl:
             Type: String
@@ -18,6 +18,10 @@ Parameters:
         SslCert: 
             Type: String
             Default: '{{resolve:ssm:/account/ssl-cert:1}}'
+        
+        HostedZoneId: 
+            Type: String
+            Default: '{{resolve:ssm:/account/hosted-zone-id:1}}'
         
         SkillName:
             Type: String
@@ -64,18 +68,37 @@ Resources:
             Stage: !Ref ServiceApi.Stage
             DomainName: !Ref APIDomainName
             RestApiId: !Ref ServiceApi
+    
 
     APIDomain:
-        Type: AWS::Route53::RecordSetGroup
-        DependsOn: APIDomainName
+        Type: 'AWS::Route53::RecordSetGroup'
         Properties:
-          HostedZoneName: !Join [ '', [ !Ref RootUrl, '.' ] ]
-          RecordSets:
-          - Name: !Ref APIDomainName
-            Type: A
-            AliasTarget:
-              DNSName: !GetAtt [APIDomainName, RegionalDomainName]
-              HostedZoneId: !GetAtt [APIDomainName, RegionalHostedZoneId]
+            HostedZoneName:
+                Fn::Join: [ '', [ Ref: RootUrl, '.' ] ]
+            RecordSets:
+            - Name: 
+                Ref: APIDomainName
+              Type: A
+              AliasTarget:
+                DNSName:
+                    Fn::GetAtt: [APIDomainName, RegionalDomainName]
+                HostedZoneId:
+                    Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
+
+    # RootAPIDomain:
+    #     Type: 'AWS::Route53::RecordSetGroup'
+    #     Properties:
+    #         HostedZoneName:
+    #             Fn::Join: [ '', [ Ref: RootUrl, '.' ] ]
+    #         RecordSets:
+    #         - Name: 
+    #             Ref: RootUrl
+    #           Type: A
+    #           AliasTarget:
+    #             DNSName:
+    #                 !Sub "https://${ServiceApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    #             HostedZoneId:
+    #                 !Ref HostedZoneId
     
     # UiLambdaFunctionVersion: 
     #     Type: AWS::Lambda::Version

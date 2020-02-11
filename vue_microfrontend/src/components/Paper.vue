@@ -40,8 +40,7 @@ export default {
     },
     branch(sk,h,level, b) {
         // Each branch will be 2/3rds the size of the previous one
-          h *= 0.86;
-          
+          h *= (0.76 + (0.1*(Math.sin(Date.now()/1000)))) ;
           level +=1
         // All recursive functions must have an exit condition!!!!
         // Here, ours is when the length of the branch is 2 pixels or less
@@ -103,7 +102,9 @@ export default {
       distance  = Math.sqrt(Math.pow(sk.mouseX - sk.width/2,2) + Math.pow(sk.mouseY - sk.height/2,2))
         
         var color = Math.floor(255-((distance / 1000)*255))
-        sk.background('rgba('+(255-color)+',195,247 ,1)');
+        var time_color = 195+Math.floor(50*(0.8*(Math.sin(Date.now()/1000))))
+        
+        sk.background('rgba('+(255-color)+','+time_color+',247 ,1)');
 
 
 
@@ -131,7 +132,11 @@ export default {
         // convert the key code to it's string
         // representation and print it
         const key = String.fromCharCode(sk.keyCode);
+        console.log(key)
         sk.print(key);
+        if (key == 'P') {
+          print('hello')
+        }
       },
   },
   render(h) {
