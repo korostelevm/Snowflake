@@ -45,10 +45,10 @@ export default {
             console.log(window.innerWidth)
             console.log(window.innerWidth)
             console.log(window.innerWidth)
-            //  if(window.innerWidth <= 600){
-            //    event_x_init = _.random(10,300)
-            //    event_y_init =  _.random(300,500)
-            //  }
+             if(window.innerWidth <= 600){
+               event_x_init = _.random(10,300)
+               event_y_init =  _.random(300,500)
+             }
             // mic.start();
             // fft.setInput(mic);
             
@@ -117,13 +117,13 @@ export default {
       draw(sk) {
         
         if(!this.fade){
-          if(window.innerWidth <= 600){
+          // if(window.innerWidth <= 600){
             event_y = sk.mouseY || event_y_init
             event_x = sk.mouseX || event_x_init
-          }else{
-            event_y = sk.mouseY || 1
-            event_x = sk.mouseX || 1
-          }
+          // }else{
+          //   event_y = sk.mouseY || 1
+          //   event_x = sk.mouseX || 1
+          // }
         }else{
           event_y = event_y * 0.9
           event_x = event_x * 0.7
