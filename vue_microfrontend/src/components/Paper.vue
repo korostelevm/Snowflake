@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="canvas_display">
     <vue-p5
         @setup="setup"
         @draw="draw"
@@ -11,8 +11,12 @@
 var theta
 var distance
 var mic
-var fft
+var velocity = 0
+var opacity = 1
+var event_x, event_y
 import VueP5 from 'vue-p5';
+import { EventBus } from '../EventBus.js';
+
 export default {
   name: 'Paper',
     components: {
@@ -21,10 +25,16 @@ export default {
   data() {
     return {
           init:false,
+          lambda_pos: _.random(5,95),
+          fade:false
           }
   },
   methods: {
     setup(sketch) {
+      EventBus.$on('lambda_click',()=>{
+        this.fade = true
+      })
+            // sketch.pixelDensity(0)
             sketch.createCanvas(window.innerWidth,window.innerHeight);
             window.onresize = function(){
                 sketch.resizeCanvas(window.innerWidth,window.innerHeight);
@@ -40,7 +50,8 @@ export default {
     },
     branch(sk,h,level, b) {
         // Each branch will be 2/3rds the size of the previous one
-          h *= (0.76 + (0.1*(Math.sin(Date.now()/2000)))) ;
+          // velocity *= 0.7
+          h *= (0.76 + (0.1*(Math.sin(Date.now()/2000))) ) ;
           level +=1
         // All recursive functions must have an exit condition!!!!
         // Here, ours is when the length of the branch is 2 pixels or less
@@ -48,7 +59,7 @@ export default {
           return
         }
         
-        h = h*( (sk.mouseY / (sk.height/2)))
+        h = h*( (event_y / (sk.height/2)))
           b = b * 0.6
           sk.strokeWeight(b);
           var color = Math.floor(255-((distance / 1000)*255))
@@ -57,7 +68,7 @@ export default {
 
           sk.push();    
           sk.noFill();
-          sk.arc(0, 0, 1000/(50*(sk.mouseY / sk.height)), 1000/(50*(sk.mouseY / sk.height)), ((sk.mouseX / sk.height))*2*sk.PI, ((sk.mouseX / sk.height))* sk.PI);
+          sk.arc(0, 0, 1000/(50*(event_y / sk.height)), 1000/(50*(event_y / sk.height)), ((event_x / sk.height))*2*sk.PI, ((event_x / sk.height))* sk.PI);
           sk.pop();    
           
           sk.push();    // Save the current state of transformation (i.e. where are we now)
@@ -96,26 +107,40 @@ export default {
         
       },
       draw(sk) {
+        
+        if(!this.fade){
+          event_y = sk.mouseY
+          event_x = sk.mouseX
+        }else{
+          event_y = event_y * 0.9
+          opacity = opacity * 0.8
+          if(opacity<0.1){
+            EventBus.$emit('hide_snowflake')
+          }
+          document.getElementById('canvas_display').setAttribute("style", 'opacity:'+opacity);
+        }
         // draw a line between the previous
         // and the current mouse position
         // sk.line(sk.pmouseX, sk.pmouseY, sk.mouseX, sk.mouseY);
-      distance  = Math.sqrt(Math.pow(sk.mouseX - sk.width/2,2) + Math.pow(sk.mouseY - sk.height/2,2))
+        // if (velocity < 1){
+        //   velocity = Math.sqrt( Math.pow(sk.pmouseX - sk.mouseX,2) + Math.pow(sk.pmouseY - sk.mouseY,2))
+        // }
+      distance  = Math.sqrt(Math.pow(event_x - sk.width/2,2) + Math.pow(event_y - sk.height/2,2))
         
         var color = Math.floor(255-((distance / 1000)*255))
         var time_color = 195+Math.floor(50*(0.8*(Math.sin(Date.now()/1000))))
         
         sk.background('rgba('+(255-color)+','+time_color+',247 ,1)');
 
-
-
+        EventBus.$emit('lambda_style','left: '+this.lambda_pos+'%; opacity: '+((event_y*2) / (sk.height)))
+        
         // sk.background('rgba(79,195,247 ,1)');
         sk.frameRate(30);
         sk.stroke(255);
-        let b = (sk.mouseY)/30
+        let b = (event_y)/30
         sk.strokeWeight(b);
         // Let's pick an angle 0 to 90 degrees based on the mouse position
-        let a = ((sk.mouseX + 600) / (sk.width)) * 90;
-        
+        let a = ((event_x + 600) / (sk.width)) * 90;
         // Convert it to radians
         theta = sk.radians(a);
         // Start the tree from the bottom of the screen
@@ -145,6 +170,9 @@ export default {
 };
 </script>
 <style lang="css">
+  #canvas_display{
+    position: absolute;
+  }
   .p5Canvas {
     width: 1000px;
     height: 1000px;
