@@ -13,6 +13,7 @@ var distance
 var mic
 var velocity = 0
 var opacity = 1
+var event_x_init, event_y_init
 var event_x, event_y
 import VueP5 from 'vue-p5';
 import { EventBus } from '../EventBus.js';
@@ -25,7 +26,7 @@ export default {
   data() {
     return {
           init:false,
-          lambda_pos: _.random(5,95),
+          lambda_pos: _.random(15,85),
           fade:false
           }
   },
@@ -41,6 +42,13 @@ export default {
             }
             console.log(VueP5)
             console.log(sketch)
+            console.log(window.innerWidth)
+            console.log(window.innerWidth)
+            console.log(window.innerWidth)
+             if(window.innerWidth <= 600){
+               event_x_init = _.random(10,300)
+               event_y_init =  _.random(300,500)
+             }
             // mic.start();
             // fft.setInput(mic);
             
@@ -109,8 +117,8 @@ export default {
       draw(sk) {
         
         if(!this.fade){
-          event_y = sk.mouseY
-          event_x = sk.mouseX
+          event_y = sk.mouseY || event_y_init
+          event_x = sk.mouseX || event_x_init
         }else{
           event_y = event_y * 0.9
           event_x = event_x * 0.7
@@ -136,7 +144,7 @@ export default {
         EventBus.$emit('lambda_style','left: '+this.lambda_pos+'%; opacity: '+((event_y*2) / (sk.height)))
         
         // sk.background('rgba(79,195,247 ,1)');
-        sk.frameRate(30);
+        // sk.frameRate(60);
         sk.stroke(255);
         let b = (event_y)/30
         sk.strokeWeight(b);
