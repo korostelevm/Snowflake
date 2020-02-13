@@ -61,6 +61,7 @@ Resources:
     APIDomainName:
         Type: AWS::ApiGateway::DomainName
         Properties:
+          SecurityPolicy: TLS_1_2
           RegionalCertificateArn: !Ref SslCert
           DomainName: !Join [ '', [ !Ref ServiceSubDomainName,'.', !Ref RootUrl ] ]
           EndpointConfiguration:
@@ -70,6 +71,7 @@ Resources:
         # DependsOn: myCertificate
         Type: AWS::ApiGateway::DomainName
         Properties:
+          SecurityPolicy: TLS_1_2
           CertificateArn: !Ref RootSslCert
           DomainName: !Join [ '', [  !Ref RootUrl ] ]
         #   EndpointConfiguration:
