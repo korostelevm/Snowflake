@@ -13,7 +13,7 @@ var distance
 var mic
 var velocity = 0
 var opacity = 1
-var event_x_init, event_y_init
+var event_x_init =0 , event_y_init =0
 var event_x, event_y
 import VueP5 from 'vue-p5';
 import { EventBus } from '../EventBus.js';
@@ -45,10 +45,10 @@ export default {
             console.log(window.innerWidth)
             console.log(window.innerWidth)
             console.log(window.innerWidth)
-             if(window.innerWidth <= 600){
-               event_x_init = _.random(10,300)
-               event_y_init =  _.random(300,500)
-             }
+            //  if(window.innerWidth <= 600){
+            //    event_x_init = _.random(10,300)
+            //    event_y_init =  _.random(300,500)
+            //  }
             // mic.start();
             // fft.setInput(mic);
             
@@ -117,8 +117,13 @@ export default {
       draw(sk) {
         
         if(!this.fade){
-          event_y = sk.mouseY || event_y_init
-          event_x = sk.mouseX || event_x_init
+          if(window.innerWidth <= 600){
+            event_y = sk.mouseY || event_y_init
+            event_x = sk.mouseX || event_x_init
+          }else{
+            event_y = sk.mouseY || 1
+            event_x = sk.mouseX || 1
+          }
         }else{
           event_y = event_y * 0.9
           event_x = event_x * 0.7
@@ -126,25 +131,30 @@ export default {
           if(opacity<0.1){
             EventBus.$emit('hide_snowflake')
           }
-          document.getElementById('canvas_display').setAttribute("style", 'opacity:'+opacity);
+          
         }
-        // draw a line between the previous
-        // and the current mouse position
-        // sk.line(sk.pmouseX, sk.pmouseY, sk.mouseX, sk.mouseY);
-        // if (velocity < 1){
-        //   velocity = Math.sqrt( Math.pow(sk.pmouseX - sk.mouseX,2) + Math.pow(sk.pmouseY - sk.mouseY,2))
-        // }
-      distance  = Math.sqrt(Math.pow(event_x - sk.width/2,2) + Math.pow(event_y - sk.height/2,2))
-        
-        var color = Math.floor(255-((distance / 1000)*255))
         var time_color = 195+Math.floor(50*(0.8*(Math.sin(Date.now()/1000))))
+        distance  = Math.sqrt(Math.pow(event_x - sk.width/2,2) + Math.pow(event_y - sk.height/2,2))
+        
+        if(!sk.mouseY){
+          // time_color =200
+          var event = new Event('mousemove');  // (*)
+          window.dispatchEvent(event);
+          // // return false
+          distance = 100
+        }
+                var color = Math.floor(255-((distance / 1000)*255))
+
+        document.getElementById('canvas_display').setAttribute("style", 'opacity:'+opacity);
+        
+        
         
         sk.background('rgba('+(255-color)+','+time_color+',247 ,1)');
 
         EventBus.$emit('lambda_style','left: '+this.lambda_pos+'%; opacity: '+((event_y*2) / (sk.height)))
         
         // sk.background('rgba(79,195,247 ,1)');
-        // sk.frameRate(60);
+        sk.frameRate(30);
         sk.stroke(255);
         let b = (event_y)/30
         sk.strokeWeight(b);
