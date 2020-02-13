@@ -85,7 +85,7 @@ canvas[resize] {
     font-family: inherit;
     font-weight: 700;
     cursor: pointer;
-    top:50vw;
+    top:70vh;
     user-select: none;
     transition: 0.3s text-shadow;
     transition: 0.3s color;

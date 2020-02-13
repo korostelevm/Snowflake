@@ -113,7 +113,8 @@ export default {
           event_x = sk.mouseX
         }else{
           event_y = event_y * 0.9
-          opacity = opacity * 0.8
+          event_x = event_x * 0.7
+          opacity = opacity * 0.9
           if(opacity<0.1){
             EventBus.$emit('hide_snowflake')
           }
