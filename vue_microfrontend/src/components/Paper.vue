@@ -40,11 +40,6 @@ export default {
             window.onresize = function(){
                 sketch.resizeCanvas(window.innerWidth,window.innerHeight);
             }
-            console.log(VueP5)
-            console.log(sketch)
-            console.log(window.innerWidth)
-            console.log(window.innerWidth)
-            console.log(window.innerWidth)
              if(window.innerWidth <= 600){
                event_x_init = _.random(10,300)
                event_y_init =  _.random(300,500)
