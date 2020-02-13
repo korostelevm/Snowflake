@@ -13,7 +13,7 @@ ssm_prefix=account
 # hosted_zone_id=$(echo $hosted_zone_json | jq -r '.HostedZone.Id' | sed -e 's/\/hostedzone\///' )
 hosted_zone_id=Z1WCZLT7BT9XLD
 
-cert_arn=$(aws acm request-certificate --domain-name "*.$url" --validation-method DNS | jq -r ".CertificateArn")
+cert_arn=$(aws acm request-certificate --domain-name "$url" --validation-method DNS | jq -r ".CertificateArn")
 
 echo "cert_arn=$cert_arn"
 
@@ -49,6 +49,7 @@ EOF
 
 aws route53 change-resource-record-sets --hosted-zone-id "$hosted_zone_id" --change-batch "$cert_dns_json"
 
-aws ssm put-parameter --name "$ssm_prefix/root-url"           --value "$url" --type String
-aws ssm put-parameter --name "$ssm_prefix/hosted-zone-id"     --value "$hosted_zone_id" --type String
-aws ssm put-parameter --name "$ssm_prefix/ssl-cert"           --value "$cert_arn" --type String
+# aws ssm put-parameter --name "$ssm_prefix/root-url"           --value "$url" --type String
+# aws ssm put-parameter --name "$ssm_prefix/hosted-zone-id"     --value "$hosted_zone_id" --type String
+# aws ssm put-parameter --name "$ssm_prefix/ssl-cert"           --value "$cert_arn" --type String
+aws ssm put-parameter --name "$ssm_prefix/root-ssl-cert"           --value "$cert_arn" --type String
