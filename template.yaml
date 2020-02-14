@@ -125,7 +125,20 @@ Resources:
                     Fn::GetAtt: [APIDomainName, RegionalDomainName]
                 HostedZoneId:
                     Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
+    
+    StaticAssetsBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: !Ref RootUrl
+            WebsiteConfiguration:
+                RedirectAllRequestsTo:
+                    HostName: !Ref RootUrl
+                    Protocol: https
+                
+                
                     
+
+
 
     # UiLambdaFunctionVersion: 
     #     Type: AWS::Lambda::Version
