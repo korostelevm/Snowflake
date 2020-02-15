@@ -43,10 +43,6 @@ Conditions:
       Acceptance: !Equals [ !Ref Environment, 'acceptance' ]
 
 Resources: 
-    # myCertificate:
-    #     Type: 'AWS::CertificateManager::Certificate'
-    #     Properties:
-    #         DomainName: !Ref RootUrl
 
     ServiceApi:
         Type: AWS::Serverless::Api
@@ -68,14 +64,11 @@ Resources:
             Types: ['REGIONAL']
     
     RootAPIDomainName:
-        # DependsOn: myCertificate
         Type: AWS::ApiGateway::DomainName
         Properties:
           SecurityPolicy: TLS_1_2
           CertificateArn: !Ref RootSslCert
           DomainName: !Join [ '', [  !Ref RootUrl ] ]
-        #   EndpointConfiguration:
-        #     Types: ['REGIONAL']
 
     RootAPIBasePathMapping:
         Type: AWS::ApiGateway::BasePathMapping
@@ -126,7 +119,7 @@ Resources:
                 HostedZoneId:
                     Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
     
-    StaticAssetsBucket:
+    RootStaticAssetsBucket:
         Type: AWS::S3::Bucket
         Properties:
             BucketName: !Ref RootUrl
@@ -134,16 +127,16 @@ Resources:
                 RedirectAllRequestsTo:
                     HostName: !Ref RootUrl
                     Protocol: https
-                
-                
-                    
-
-
-
-    # UiLambdaFunctionVersion: 
-    #     Type: AWS::Lambda::Version
-    #     Properties: 
-    #         FunctionName: !Ref UiLambdaFunction
+    
+    StaticAssetsBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: !Ref RootUrl
+            WebsiteConfiguration:
+                RedirectAllRequestsTo:
+                    HostName: 
+                        Fn::Join: [ '', [ Ref: ServiceSubDomainName, Ref: RootUrl, '.' ] ]
+                    Protocol: https
     
     UiLambdaFunction:
             Type: AWS::Serverless::Function
