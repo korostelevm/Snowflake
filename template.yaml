@@ -131,11 +131,12 @@ Resources:
     StaticAssetsBucket:
         Type: AWS::S3::Bucket
         Properties:
-            BucketName: !Ref RootUrl
+            BucketName: 
+                Fn::Join: [ '', [ Ref: ServiceSubDomainName, '.',Ref: RootUrl] ]
             WebsiteConfiguration:
                 RedirectAllRequestsTo:
                     HostName: 
-                        Fn::Join: [ '', [ Ref: ServiceSubDomainName, Ref: RootUrl, '.' ] ]
+                        Fn::Join: [ '', [ Ref: ServiceSubDomainName, '.',Ref: RootUrl] ]
                     Protocol: https
     
     UiLambdaFunction:
