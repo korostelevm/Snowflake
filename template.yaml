@@ -145,7 +145,7 @@ Resources:
                 Description: Serves microfrontend and shell html container
                 CodeUri: ui/
                 Handler: ui.lambda_handler
-                Runtime: nodejs12.x
+                Runtime: nodejs10.x
                 Environment:
                     Variables:
                         RootUrl: !Ref RootUrl
@@ -165,7 +165,7 @@ Resources:
             MemorySize: 3008
             CodeUri: service/
             Handler: service.lambda_handler
-            Runtime: nodejs12.x
+            Runtime: nodejs10.x
             Environment:
                 Variables:
                     RootUrl: !Ref RootUrl
