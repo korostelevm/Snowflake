@@ -37,4 +37,4 @@ jobs:
         sam build
         cd .aws-sam/build
         sam package --template-file template.yaml --use-json --s3-bucket cold-lambda --s3-prefix Snowflake --output-template-file ${PWD##*/}.json
-        sam deploy --template-file ${PWD##*/}.json --stack-name Snowflake --capabilities CAPABILITY_IAM 
+        sam deploy --template-file ${PWD##*/}.json --stack-name Snowflake --capabilities CAPABILITY_IAM --no-fail-on-empty-changeset

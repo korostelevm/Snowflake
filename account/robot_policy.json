@@ -32,7 +32,6 @@
                 "cognito-idp:*",
                 "dynamodb:*",
                 "events:*",
-                "glue:*",
                 "iam:AddRoleToInstanceProfile",
                 "iam:AttachRolePolicy",
                 "iam:CreateInstanceProfile",
