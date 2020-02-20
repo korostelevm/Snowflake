@@ -77,17 +77,35 @@ Resources:
                 AllowHeaders: "'*'"
                 AllowOrigin: "'*'"
 
-    ServiceHttpApi:
-        Type: AWS::Serverless::HttpApi
+    # ServiceHttpApi:
+    #     # Type: AWS::Serverless::HttpApi
+    #     Type: AWS::ApiGatewayV2::Api
+    #     Properties:
+    #         Name: !Join [ '', [ 'HttpApi', !Ref AWS::StackName ] ]
+    #         ProtocolType: HTTP
+    #         # Target: !Ref ServiceApiFunction
+    #         Target: arn:aws:apigateway:{region}:lambda:path/2015-03-31/functions/arn:aws:lambda:{region}:{account-id}:function:{function-name}/invocations
+    #         CorsConfiguration:
+    #             AllowMethods: ["*"]
+    #             AllowHeaders: ["*"]
+    #             AllowOrigins: ["https://"]
+    #             AllowCredentials: true
 
+    # ServiceHttpApiStage:
+    #     Type: AWS::ApiGatewayV2::Stage
+    #     Properties: 
+    #         ApiId: !Ref ServiceHttpApi
+    #         AutoDeploy: true
+    #         StageName: $default
 
     APIBasePathMapping:
         Type: AWS::ApiGatewayV2::ApiMapping
         DependsOn: APIDomainName
         Properties:
-            Stage: !Ref ServiceHttpApi.Stage
-            DomainName: !Ref APIDomainName
+            Stage: '$default'
+            # Stage: !Ref ServiceHttpApiStage
             ApiId: !Ref ServiceHttpApi
+            DomainName: !Ref APIDomainName
     
     WWWBasePathMapping:
         Type: AWS::ApiGateway::BasePathMapping
@@ -208,15 +226,16 @@ Resources:
             #       "Action": ["es:*","lambda:*","apigateway:*","s3:*","dynamodb:*"],
             #       "Resource": "*"
             #     }]
-            Events:
-                ApiPost:
-                    Type: HttpApi
-                    Properties:
-                        ApiId: !Ref ServiceHttpApi
-                        Path: /
-                        Method: post
-                        # Auth:
-                            #     Authorizer: CognitoAuthorizer
+            # Events:
+            #     ApiPost:
+            #         Type: HttpApi
+            #         Properties:
+            #             ApiId: !Ref ServiceHttpApi
+            #             Stage: '$default'
+            #             Path: /users
+            #             Method: post
+            #             # Auth:
+            #                 #     Authorizer: CognitoAuthorizer
                 # ApiPosts:
                 #     Type: Api
                 #     Properties:
