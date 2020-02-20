@@ -32,7 +32,7 @@ jobs:
         cd ..
         cp vue_microfrontend/build/microfrontend/microfrontend.js ./ui/microfrontend.js
         cp index.html ./ui/index.html
-        pip install --quiet aws-sam-cli 
+        sudo pip install --quiet aws-sam-cli 
         cd $root
         sam build
         cd .aws-sam/build
