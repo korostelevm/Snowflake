@@ -24,4 +24,4 @@ jobs:
     - name: npm install build and test
       run: |
         export cicd=true
-        npm run deploy -- --app:bucket=cold-lambda
+        sudo npm run deploy -- --app:bucket=cold-lambda
