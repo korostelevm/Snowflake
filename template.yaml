@@ -7,9 +7,9 @@ Globals:
 
 
 Parameters:
-        ServiceSubDomainName:
+        ServiceApiSubDomainName:
             Type: String
-            Default: 'www'
+            Default: 'api'
 
         RootUrl:
             Type: String
@@ -43,6 +43,29 @@ Conditions:
       Acceptance: !Equals [ !Ref Environment, 'acceptance' ]
 
 Resources: 
+    
+    APIDomainName:
+        Type: 'AWS::ApiGatewayV2::DomainName'
+        Properties:
+            DomainName: !Join [ '', [ !Ref ServiceApiSubDomainName, '.', !Ref RootUrl ] ]
+            DomainNameConfigurations:
+                - EndpointType: REGIONAL
+                  CertificateArn: !Ref SslCert
+    
+    WWWAPIDomainName:
+        Type: AWS::ApiGateway::DomainName
+        Properties:
+          SecurityPolicy: TLS_1_2
+          CertificateArn: !Ref SslCert
+          DomainName: !Join [ '', [ 'www.', !Ref RootUrl ] ]
+    
+    RootAPIDomainName:
+        Type: AWS::ApiGateway::DomainName
+        Properties:
+          SecurityPolicy: TLS_1_2
+          CertificateArn: !Ref RootSslCert
+          DomainName: !Join [ '', [  !Ref RootUrl ] ]
+
 
     ServiceApi:
         Type: AWS::Serverless::Api
@@ -54,21 +77,25 @@ Resources:
                 AllowHeaders: "'*'"
                 AllowOrigin: "'*'"
 
-    APIDomainName:
-        Type: AWS::ApiGateway::DomainName
+    ServiceHttpApi:
+        Type: AWS::Serverless::HttpApi
+
+
+    APIBasePathMapping:
+        Type: AWS::ApiGatewayV2::ApiMapping
+        DependsOn: APIDomainName
         Properties:
-          SecurityPolicy: TLS_1_2
-          CertificateArn: !Ref SslCert
-          DomainName: !Join [ '', [ !Ref ServiceSubDomainName,'.', !Ref RootUrl ] ]
-        #   EndpointConfiguration:
-        #     Types: ['REGIONAL']
+            Stage: !Ref ServiceHttpApi.Stage
+            DomainName: !Ref APIDomainName
+            ApiId: !Ref ServiceHttpApi
     
-    RootAPIDomainName:
-        Type: AWS::ApiGateway::DomainName
+    WWWBasePathMapping:
+        Type: AWS::ApiGateway::BasePathMapping
+        DependsOn: WWWAPIDomainName
         Properties:
-          SecurityPolicy: TLS_1_2
-          CertificateArn: !Ref RootSslCert
-          DomainName: !Join [ '', [  !Ref RootUrl ] ]
+            Stage: !Ref ServiceApi.Stage
+            DomainName: !Ref WWWAPIDomainName
+            RestApiId: !Ref ServiceApi
 
     RootAPIBasePathMapping:
         Type: AWS::ApiGateway::BasePathMapping
@@ -77,6 +104,21 @@ Resources:
             Stage: !Ref ServiceApi.Stage
             DomainName: !Ref RootAPIDomainName
             RestApiId: !Ref ServiceApi
+
+    APIDomain:
+        Type: 'AWS::Route53::RecordSetGroup'
+        Properties:
+            HostedZoneName:
+                Fn::Join: [ '', [ Ref: RootUrl, '.' ] ]
+            RecordSets:
+            - Name: 
+                Ref: APIDomainName
+              Type: A
+              AliasTarget:
+                DNSName:
+                    Fn::GetAtt: [APIDomainName, RegionalDomainName]
+                HostedZoneId:
+                    Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
 
     RootAPIDomain:
         DependsOn: RootAPIDomainName
@@ -94,30 +136,21 @@ Resources:
                 HostedZoneId:
                     Fn::GetAtt: [RootAPIDomainName, DistributionHostedZoneId]
 
-
-    APIBasePathMapping:
-        Type: AWS::ApiGateway::BasePathMapping
-        DependsOn: APIDomainName
-        Properties:
-            Stage: !Ref ServiceApi.Stage
-            DomainName: !Ref APIDomainName
-            RestApiId: !Ref ServiceApi
-    
-
-    APIDomain:
+    WWWAPIDomain:
         Type: 'AWS::Route53::RecordSetGroup'
         Properties:
             HostedZoneName:
                 Fn::Join: [ '', [ Ref: RootUrl, '.' ] ]
             RecordSets:
             - Name: 
-                Ref: APIDomainName
+                Ref: WWWAPIDomainName
               Type: A
               AliasTarget:
                 DNSName:
-                    Fn::GetAtt: [APIDomainName, DistributionDomainName]
+                    Fn::GetAtt: [WWWAPIDomainName, DistributionDomainName]
                 HostedZoneId:
-                    Fn::GetAtt: [APIDomainName, DistributionHostedZoneId]
+                    Fn::GetAtt: [WWWAPIDomainName, DistributionHostedZoneId]
+    
     
     RootStaticAssetsBucket:
         Type: AWS::S3::Bucket
@@ -128,15 +161,15 @@ Resources:
                     HostName: !Ref RootUrl
                     Protocol: https
     
-    StaticAssetsBucket:
+    WWWStaticAssetsBucket:
         Type: AWS::S3::Bucket
         Properties:
             BucketName: 
-                Fn::Join: [ '', [ Ref: ServiceSubDomainName, '.',Ref: RootUrl] ]
+                Fn::Join: [ '', ['www.',Ref: RootUrl] ]
             WebsiteConfiguration:
                 RedirectAllRequestsTo:
                     HostName: 
-                        Fn::Join: [ '', [ Ref: ServiceSubDomainName, '.',Ref: RootUrl] ]
+                        Fn::Join: [ '', ['www.',Ref: RootUrl] ]
     
     UiLambdaFunction:
             Type: AWS::Serverless::Function
@@ -149,6 +182,7 @@ Resources:
                 Environment:
                     Variables:
                         RootUrl: !Ref RootUrl
+                        ServiceApiSubDomainName: !Ref ServiceApiSubDomainName
                 Events:
                     Get:
                         Type: Api
@@ -156,8 +190,6 @@ Resources:
                             Path: /
                             RestApiId: !Ref ServiceApi
                             Method: GET
-                            # Auth:
-                            #     Authorizer: CognitoAuthorizer
                             
     ServiceApiFunction:
         Type: AWS::Serverless::Function
@@ -177,30 +209,30 @@ Resources:
             #       "Resource": "*"
             #     }]
             Events:
-                ApiGets:
-                    Type: Api
+                ApiPost:
+                    Type: HttpApi
                     Properties:
-                        RestApiId: !Ref ServiceApi
-                        Path: /{resource}/{method}
-                        Method: get
-                        # Auth:
-                            #     Authorizer: CognitoAuthorizer
-                ApiPosts:
-                    Type: Api
-                    Properties:
-                        RestApiId: !Ref ServiceApi
-                        Path: /{resource}/{method}
+                        ApiId: !Ref ServiceHttpApi
+                        Path: /
                         Method: post
                         # Auth:
                             #     Authorizer: CognitoAuthorizer
-                ApiOptions:
-                    Type: Api
-                    Properties:
-                        RestApiId: !Ref ServiceApi
-                        Path: /{resource}/{method}
-                        Method: options
-                        # Auth:
-                            #     Authorizer: CognitoAuthorizer
+                # ApiPosts:
+                #     Type: Api
+                #     Properties:
+                #         RestApiId: !Ref ServiceApi
+                #         Path: /{resource}/{method}
+                #         Method: post
+                #         # Auth:
+                #             #     Authorizer: CognitoAuthorizer
+                # ApiOptions:
+                #     Type: Api
+                #     Properties:
+                #         RestApiId: !Ref ServiceApi
+                #         Path: /{resource}/{method}
+                #         Method: options
+                #         # Auth:
+                #             #     Authorizer: CognitoAuthorizer
 
                         
 Outputs:

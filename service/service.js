@@ -22,7 +22,8 @@ var respond = function(payload,code){
 
 
 lambda_handler = async (event, context) => {
-    
+    console.log(JSON.stringify(event,null,2))
+    console.log(JSON.stringify(context,null,2))
     if(typeof(event.headers['x-status'])!='undefined' || event.httpMethod == 'OPTIONS')
         return respond('OK',200)
     

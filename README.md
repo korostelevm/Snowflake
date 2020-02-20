@@ -1,6 +1,18 @@
 
 ### to try
 
+make sure you have the latest sam cli installed 
+```
+brew upgrade aws-sam-cli
+```
+follow instructions at https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html
+
+install yq, while sam cli http api is in beta, needed to merge api.yaml wiht _template.yaml to generate template.yaml with api definiteion injected
+```
+brew install yq
+```
+
+
 1 - install dependencies
 ```
 npm run install-all

@@ -43,6 +43,7 @@ export default {
     EventBus.$on('hide_snowflake',()=>{
       this.show_snowflake= false
     })
+    this.call_api()
   },
   created: function(){
       this.auth = JSON.parse(sessionStorage.getItem('currentUser'))
@@ -50,6 +51,26 @@ export default {
   updated() {
   },
   methods: {
+    call_api(){
+      return new Promise((resolve,reject)=>{
+        fetch(this.$api + 'users', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': this.get_auth_header()
+              },
+              body: JSON.stringify({
+              }),
+            })
+            .then(res => res.json())
+            .then(data => {
+              resolve(data)
+            }).catch(e => {
+              console.log('exception:', e);
+            })
+      })
+          
+    },
     click_lambda(){
       EventBus.$emit('lambda_click')
       // this.show_snowflake = false

@@ -13,8 +13,11 @@ if [ $stage = "acceptance" ]; then
 fi
 webpack --config ./webpack.config.js -p
 
+
 cd ..
 cp vue_microfrontend/build/microfrontend/microfrontend.js ./ui/microfrontend.js
 cp index.html ./ui/index.html
 
 cd $root
+
+# yq m api.yaml _template.yaml > template.yaml

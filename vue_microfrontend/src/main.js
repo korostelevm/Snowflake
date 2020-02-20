@@ -17,11 +17,13 @@ Vue.prototype.$dispatch = function(channel,o){
 }
 
 Vue.mixin({
-  data: function() {
-    return {
-      auth:JSON.parse(sessionStorage.getItem('currentUser'))
-    }
+  methods: {
+    get_auth_header: function() {
+      return JSON.parse(sessionStorage.getItem('auth'))
+    },
   }
 })
+
+
 
 Vue.customElement('snowflake-ui', App);

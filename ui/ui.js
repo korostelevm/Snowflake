@@ -35,10 +35,11 @@ exports.lambda_handler = async (event, context, callback) => {
     
     var response = fs.readFileSync(path.join(__dirname, './index.html'), "utf8");
     response = response.replace(/http:\/\/localhost:1111\/microfrontend.js/g, host+'/?microfrontend=module');
-    
+
+    var api = 'https://'+process.envServiceApiSubDomainName+'.'+process.env.RootUrl
     if (event.queryStringParameters && event.queryStringParameters.microfrontend) {
         response = fs.readFileSync(path.join(__dirname, './microfrontend.js'), "utf8");
-        response = response.replace(/http:\/\/localhost:3000\//g, host + '/');
+        response = response.replace(/http:\/\/localhost:3000\//g, api + '/');
     }
 
     return await compressed(response)
