@@ -1,0 +1,42 @@
+on:
+  push:
+    branches:
+      - master
+
+name: Deploy to AWS
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: npm install and build and deploy
+      run: |
+        env | sort
+        root=$(pwd)
+        sudo npm install -g webpack
+        sudo npm install -g webpack-cli
+        cd vue_microfrontend
+        yes | npm install
+        webpack --config ./webpack.config.js -p
+        cd ..
+        cp vue_microfrontend/build/microfrontend/microfrontend.js ./ui/microfrontend.js
+        cp index.html ./ui/index.html
+        sudo pip install --quiet aws-sam-cli 
+        cd $root
+        sam build
+        cd .aws-sam/build
+        sam package --template-file template.yaml --use-json --s3-bucket cold-lambda --s3-prefix Snowflake --output-template-file ${PWD##*/}.json
+        sha_8=$(git rev-parse HEAD | cut -c1-8)
+        sam deploy --template-file ${PWD##*/}.json --stack-name Snowflake --capabilities CAPABILITY_IAM --no-fail-on-empty-changeset --tags "sha=$sha_8"
