@@ -1,16 +1,14 @@
 #! /usr/bin/env bash
 set -ex
 root=$(pwd)
-env | sort
-aws s3 ls
 
-if [ $SUDO_USER = "runner" ]; then
+if [ $stage = "acceptance" ]; then
     npm install -g webpack
     npm install -g webpack-cli
 fi
 
 cd vue_microfrontend
-if [ $SUDO_USER = "runner" ]; then
+if [ $stage = "acceptance" ]; then
     yes | npm install
 fi
 webpack --config ./webpack.config.js -p
@@ -20,8 +18,3 @@ cp vue_microfrontend/build/microfrontend/microfrontend.js ./ui/microfrontend.js
 cp index.html ./ui/index.html
 
 cd $root
-
-if [ $SUDO_USER = "runner" ]; then
-    pip install --quiet aws-sam-cli 
-    sam build
-fi

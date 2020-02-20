@@ -23,4 +23,18 @@ jobs:
 
     - name: npm install build and test
       run: |
-        sudo npm run deploy -- --app:bucket=cold-lambda
+        root=$(pwd)
+        sudo npm install -g webpack
+        sudo npm install -g webpack-cli
+        cd vue_microfrontend
+        yes | npm install
+        webpack --config ./webpack.config.js -p
+        cd ..
+        cp vue_microfrontend/build/microfrontend/microfrontend.js ./ui/microfrontend.js
+        cp index.html ./ui/index.html
+        pip install --quiet aws-sam-cli 
+        cd $root
+        sam build
+        cd .aws-sam/build
+        sam package --template-file template.yaml --use-json --s3-bucket $npm_package_config_bucket --s3-prefix ${PWD##*/} --output-template-file ${PWD##*/}.json
+        sam deploy --template-file ${PWD##*/}.json --stack-name ${PWD##*/} --capabilities CAPABILITY_IAM 
