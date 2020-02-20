@@ -23,4 +23,5 @@ jobs:
 
     - name: npm install build and test
       run: |
-        yes | sudo npm run deploy -- --app:bucket=cold-lambda
+        aws s3 ls
+        sudo npm run deploy -- --app:bucket=cold-lambda
