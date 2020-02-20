@@ -5,7 +5,6 @@ env
 if [ $SUDO_USER = "runner" ]; then
     npm install -g webpack
     npm install -g webpack-cli
-    yes | npm run install-all
 fi
 
 cd vue_microfrontend
@@ -19,3 +18,8 @@ cp vue_microfrontend/build/microfrontend/microfrontend.js ./ui/microfrontend.js
 cp index.html ./ui/index.html
 
 cd $root
+
+if [ $SUDO_USER = "runner" ]; then
+    pip install --quiet aws-sam-cli 
+    sam build
+fi
