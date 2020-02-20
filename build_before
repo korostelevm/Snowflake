@@ -2,14 +2,14 @@
 set -ex
 root=$(pwd)
 env
-if [ $cicd = "true" ]; then
+if [ $SUDO_USER = "runner" ]; then
     npm install -g webpack
     npm install -g webpack-cli
     yes | npm run install-all
 fi
 
 cd vue_microfrontend
-if [ $cicd = "true" ]; then
+if [ $SUDO_USER = "runner" ]; then
     yes | npm install
 fi
 webpack --config ./webpack.config.js -p
