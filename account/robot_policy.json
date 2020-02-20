@@ -9,7 +9,8 @@
                 "dynamodb:*",
                 "route53:*",
                 "apigateway:*",
-                "cloudwatch:*"
+                "cloudwatch:*",
+                "ssm:GetParameters"
             ],
             "Resource": [
                 "*"
