@@ -58,10 +58,10 @@ Resources:
         Type: AWS::ApiGateway::DomainName
         Properties:
           SecurityPolicy: TLS_1_2
-          CertificateArn: !Ref SslCert
+          RegionalCertificateArn: !Ref SslCert
           DomainName: !Join [ '', [ !Ref ServiceSubDomainName,'.', !Ref RootUrl ] ]
-        #   EndpointConfiguration:
-        #     Types: ['REGIONAL']
+          EndpointConfiguration:
+            Types: ['REGIONAL']
     
     RootAPIDomainName:
         Type: AWS::ApiGateway::DomainName
@@ -115,9 +115,9 @@ Resources:
               Type: A
               AliasTarget:
                 DNSName:
-                    Fn::GetAtt: [APIDomainName, DistributionDomainName]
+                    Fn::GetAtt: [APIDomainName, RegionalDomainName]
                 HostedZoneId:
-                    Fn::GetAtt: [APIDomainName, DistributionHostedZoneId]
+                    Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
     
     RootStaticAssetsBucket:
         Type: AWS::S3::Bucket
@@ -137,6 +137,7 @@ Resources:
                 RedirectAllRequestsTo:
                     HostName: 
                         Fn::Join: [ '', [ Ref: ServiceSubDomainName, '.',Ref: RootUrl] ]
+                    Protocol: https
     
     UiLambdaFunction:
             Type: AWS::Serverless::Function
@@ -145,9 +146,10 @@ Resources:
                 Description: Serves microfrontend and shell html container
                 CodeUri: ui/
                 Handler: ui.lambda_handler
-                Runtime: nodejs12.x
+                Runtime: nodejs10.x
                 Environment:
                     Variables:
+                        ServiceUrl: !Join [ '', [ 'https://', !Ref ServiceSubDomainName, '.', !Ref RootUrl ] ]
                         RootUrl: !Ref RootUrl
                 Events:
                     Get:
@@ -165,7 +167,7 @@ Resources:
             MemorySize: 3008
             CodeUri: service/
             Handler: service.lambda_handler
-            Runtime: nodejs12.x
+            Runtime: nodejs10.x
             Environment:
                 Variables:
                     RootUrl: !Ref RootUrl
@@ -207,11 +209,6 @@ Outputs:
     APIDomainName:
         Description: "Api Domain Name"
         Value: !Ref APIDomainName
-    
-    RootAPIDomainName:
-        Description: "Root Api Domain Name"
-        Value: !Ref RootAPIDomainName
-    
     ApiUrl:
         Description: The API URL
         Value: !Sub "https://${ServiceApi}.execute-api.${AWS::Region}.amazonaws.com/"

@@ -27,18 +27,15 @@ function compressed(response) {
 } 
 
 exports.lambda_handler = async (event, context, callback) => {
-    // console.log(JSON.stringify(event,null,2))
-    // console.log(JSON.stringify(context,null,2))
-    var host = 'https://'+event.headers.Host
     if(typeof(event.headers['x-status'])!='undefined' || event.httpMethod == 'OPTIONS')
         return respond('OK',200)
     
     var response = fs.readFileSync(path.join(__dirname, './index.html'), "utf8");
-    response = response.replace(/http:\/\/localhost:1111\/microfrontend.js/g, host+'/?microfrontend=module');
+    response = response.replace(/http:\/\/localhost:1111\/microfrontend.js/g, process.env.ServiceUrl+'/?microfrontend=module');
     
     if (event.queryStringParameters && event.queryStringParameters.microfrontend) {
         response = fs.readFileSync(path.join(__dirname, './microfrontend.js'), "utf8");
-        response = response.replace(/http:\/\/localhost:3000\//g, host + '/');
+        response = response.replace(/http:\/\/localhost:3000\//g, process.env.ServiceUrl + '/');
     }
 
     return await compressed(response)
