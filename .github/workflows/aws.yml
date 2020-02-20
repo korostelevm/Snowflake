@@ -21,7 +21,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: npm install build and test
+    - name: npm install and build and deploy
       run: |
         root=$(pwd)
         sudo npm install -g webpack
