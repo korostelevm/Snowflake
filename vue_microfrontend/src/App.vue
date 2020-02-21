@@ -15,7 +15,8 @@
       <div
         class='content'
       > 
-        sup sup sup
+      <Content/>
+        sup sup sup 
       </div>
         
     </div>

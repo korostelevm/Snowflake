@@ -14,7 +14,7 @@ fi
 webpack --config ./webpack.config.js -p
 
 cd ..
-cp vue_microfrontend/build/microfrontend/microfrontend.js ./ui/microfrontend.js
-cp index.html ./ui/index.html
+cp vue_microfrontend/build/microfrontend/app.js ./ui/app.js
+cp vue_microfrontend/public/index.html ./ui/index.html
 
 cd $root

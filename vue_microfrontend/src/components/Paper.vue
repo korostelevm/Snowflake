@@ -17,7 +17,7 @@ var event_x_init =0 , event_y_init =0
 var event_x, event_y
 import VueP5 from 'vue-p5';
 import { EventBus } from '../EventBus.js';
-
+var _ = require('lodash')
 export default {
   name: 'Paper',
     components: {
@@ -29,6 +29,9 @@ export default {
           lambda_pos: _.random(15,85),
           fade:false
           }
+  },
+  destroyed(){
+    // delete VueP5
   },
   methods: {
     setup(sketch) {

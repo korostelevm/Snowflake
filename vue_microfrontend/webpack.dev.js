@@ -16,5 +16,5 @@ config.devServer = {
 config.mode = 'development'
 
 module.exports = config;
-console.log(config)
+// console.log(config)
 

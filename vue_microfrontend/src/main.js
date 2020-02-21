@@ -1,12 +1,13 @@
 import Vue from 'vue'
 import App from './App.vue'
-import VueLodash from 'vue-lodash'
+// import VueLodash from 'vue-lodash'
 
 import './components/_globals'
 import vueCustomElement from 'vue-custom-element'
 
 
 Vue.use(vueCustomElement);
+// Vue.use(VueLodash);
 
 Vue.prototype.$api = 'http://localhost:3000/'
 
