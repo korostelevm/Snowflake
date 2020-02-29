@@ -16,7 +16,7 @@
     "start:shell": "sleep 3  && open http://localhost:8080/",
     "start:auth": "cd vue && webpack-dev-server --config ./webpack.dev.js --port 2222",
     "start:microfrontend": "cd vue_microfrontend && webpack-dev-server --config ./webpack.dev.js --port 1111",
-    "build": ". ./build_before",
+    "build": "./build_before",
     "deploy": "npm run build && npm run deploy:package && npm run deploy:deploy",
     "deploy:package": "sam package --template-file template.yaml --use-json --s3-bucket $npm_package_config_bucket --s3-prefix ${PWD##*/} --output-template-file ${PWD##*/}.json",
     "deploy:deploy": "sam deploy --template-file ${PWD##*/}.json --stack-name ${PWD##*/} --capabilities CAPABILITY_IAM "
