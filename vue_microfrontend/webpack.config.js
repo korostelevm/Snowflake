@@ -7,7 +7,7 @@ module.exports = {
   entry: path.resolve(__dirname, 'src/main.js'),
   output: {
     libraryTarget: 'umd', 
-    filename: 'microfrontend.js',
+    filename: 'app.js',
     library: 'microfrontend',
     path: path.resolve(__dirname, 'build/microfrontend'),
   },

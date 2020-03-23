@@ -34,10 +34,10 @@ exports.lambda_handler = async (event, context, callback) => {
         return respond('OK',200)
     
     var response = fs.readFileSync(path.join(__dirname, './index.html'), "utf8");
-    response = response.replace(/http:\/\/localhost:1111\/microfrontend.js/g, host+'/?microfrontend=module');
+    response = response.replace(/http:\/\/localhost:1111\/app.js/g, host+'/?microfrontend=module');
     
     if (event.queryStringParameters && event.queryStringParameters.microfrontend) {
-        response = fs.readFileSync(path.join(__dirname, './microfrontend.js'), "utf8");
+        response = fs.readFileSync(path.join(__dirname, './app.js'), "utf8");
         response = response.replace(/http:\/\/localhost:3000\//g, host + '/');
     }
 

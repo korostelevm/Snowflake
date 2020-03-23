@@ -158,3 +158,4 @@ AskService.json
 # End of https://www.gitignore.io/api/osx,node,linux,windows
 Snowflake.json
 git.json
+scrap/*
