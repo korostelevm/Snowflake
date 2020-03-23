@@ -20,7 +20,8 @@
     "vue-custom-element": "^3.2.12",
     "vue-lodash": "^2.0.2",
     "vue-p5": "^0.8.3",
-    "vue-slider-component": "^3.0.40"
+    "vue-slider-component": "^3.0.40",
+    "vue-threejs": "^0.2.0-alpha.1"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",

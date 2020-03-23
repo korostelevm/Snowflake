@@ -46,6 +46,7 @@ export default {
     })
   },
   created: function(){
+
       this.auth = JSON.parse(sessionStorage.getItem('currentUser'))
   },
   updated() {
