@@ -16,7 +16,6 @@
         class='content'
       > 
       <Content/>
-        sup sup sup 
       </div>
         
     </div>
@@ -28,12 +27,21 @@ import { EventBus } from './EventBus.js';
 export default {
   name: 'microfrontend',
   data() {
+    var show_snowflake = true;
+    if(window.location.hash=='#snow'){
+      show_snowflake=false;
+      EventBus.$emit('snow')
+    }
     return {
           init:false,
-          show_snowflake:true
+          show_snowflake:show_snowflake
           }
   },
   mounted:function(){
+    if(window.location.hash=='#snow'){
+      this.show_snowflake=false;
+      EventBus.$emit('snow')
+    }
     this.$dispatch('mounted',{
       message:'mounted into #microfrontend!'
     })
@@ -78,7 +86,7 @@ canvas[resize] {
 }
 
 #lambda_button {
-    z-index: 10;
+    z-index: 20;
     font-size: 140px;
     position: absolute;
     /* width: 100%; */
@@ -101,7 +109,7 @@ canvas[resize] {
 }
 .cool{
     /* overflow: hidden; */
-    animation: 0.15s linear 0s 1 expandHeight;
+    /* animation: 0.15s linear 0s 1 expandHeight; */
   }
 
 .content{

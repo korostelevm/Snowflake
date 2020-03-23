@@ -123,11 +123,13 @@ export default {
           //   event_x = sk.mouseX || 1
           // }
         }else{
+          EventBus.$emit('snow')
           event_y = event_y * 0.9
           event_x = event_x * 0.7
           opacity = opacity * 0.9
           if(opacity<0.1){
             EventBus.$emit('hide_snowflake')
+            
           }
           
         }
@@ -150,6 +152,7 @@ export default {
         sk.background('rgba('+(255-color)+','+time_color+',247 ,1)');
 
         EventBus.$emit('lambda_style','left: '+this.lambda_pos+'%; opacity: '+((event_y*2) / (sk.height)))
+        
         
         // sk.background('rgba(79,195,247 ,1)');
         sk.frameRate(30);
@@ -188,6 +191,7 @@ export default {
 </script>
 <style lang="css">
   #canvas_display{
+    z-index: 10;;
     position: absolute;
   }
   .p5Canvas {
