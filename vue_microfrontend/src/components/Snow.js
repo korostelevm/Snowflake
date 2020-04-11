@@ -106,26 +106,33 @@
       // } );
 
       // gui.open();
-
+      var permission_check = false;
       document.addEventListener( 'mousemove', onDocumentMouseMove, false );
       document.addEventListener( 'touchstart', onDocumentTouchStart, false );
       document.addEventListener( 'touchmove', onDocumentTouchMove, false );
       function permission () {
-    if ( typeof( DeviceMotionEvent ) !== "undefined" && typeof( DeviceMotionEvent.requestPermission ) === "function" ) {
-        // (optional) Do something before API request prompt.
-        DeviceMotionEvent.requestPermission()
-            .then( response => {
+        if(permission_check){
+          return false
+        }
+        if ( typeof( DeviceMotionEvent ) !== "undefined" && typeof( DeviceMotionEvent.requestPermission ) === "function" ) {
+          // (optional) Do something before API request prompt.
+          DeviceMotionEvent.requestPermission()
+          .then( response => {
             // (optional) Do something after API prompt dismissed.
             if ( response == "granted" ) {
+              open = true
               window.addEventListener("devicemotion", accelerometerUpdate, true);
             }
-        })
-            .catch( console.error )
-    } else {
-        console.warn( "DeviceMotionEvent is not defined" );
-    }
-}
-      permission()
+          })
+          .catch( console.error )
+        } else {
+          console.warn( "DeviceMotionEvent is not defined" );
+        }
+        permission_check = true;
+      }
+      document.addEventListener( 'touchstart', permission, false );
+      
+    
 
       window.addEventListener("devicemotion", accelerometerUpdate, true);
 
@@ -172,7 +179,6 @@ function accelerometerUpdate(event) {
     }
 
     function onDocumentTouchStart( event ) {
-
       if ( event.touches.length === 1 ) {
 
         event.preventDefault();

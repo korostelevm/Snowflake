@@ -146,6 +146,7 @@ Resources:
                 CodeUri: ui/
                 Handler: ui.lambda_handler
                 Runtime: nodejs10.x
+                Tracing: Active
                 Environment:
                     Variables:
                         RootUrl: !Ref RootUrl
@@ -166,6 +167,7 @@ Resources:
             CodeUri: service/
             Handler: service.lambda_handler
             Runtime: nodejs10.x
+            Tracing: Active
             Environment:
                 Variables:
                     RootUrl: !Ref RootUrl
