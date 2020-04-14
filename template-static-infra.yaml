@@ -6,10 +6,16 @@ Globals:
 Parameters:
   ServiceSubDomainName:
     Type: String
-    Default: 'express'
+    Default: 'www'
   RootUrl:
     Type: String
     Default: '{{resolve:ssm:/account/root-url:1}}'
+  RootSslCert: 
+    Type: String
+    Default: '{{resolve:ssm:/account/root-ssl-cert:1}}'
+  HostedZoneId: 
+    Type: String
+    Default: '{{resolve:ssm:/account/hosted-zone-id:1}}'
   SslCert: 
     Type: String
     Default: '{{resolve:ssm:/account/ssl-cert:1}}'
@@ -23,16 +29,22 @@ Parameters:
     Type: String
     Default: ''
 Resources:
+
   APIDomainName:
     Type: 'AWS::ApiGateway::DomainName'
     Properties:
       SecurityPolicy: TLS_1_2
-      RegionalCertificateArn:
-        Ref: SslCert
+      CertificateArn: !Ref RootSslCert
       DomainName:
         Fn::Join: [ '', [ Ref: ServiceSubDomainName, Ref: Namespace, '.', Ref: RootUrl ] ]
-      EndpointConfiguration:
-        Types: ['REGIONAL']
+  
+  RootAPIDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      SecurityPolicy: TLS_1_2
+      CertificateArn: !Ref RootSslCert
+      DomainName: !Join [ '', [  !Ref RootUrl ] ]
+  
   APIDomain:
     Type: 'AWS::Route53::RecordSetGroup'
     Properties:
@@ -44,9 +56,45 @@ Resources:
           Type: A
           AliasTarget:
             DNSName:
-              Fn::GetAtt: [APIDomainName, RegionalDomainName]
+                Fn::GetAtt: [RootAPIDomainName, DistributionDomainName]
             HostedZoneId:
-              Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
+                Fn::GetAtt: [RootAPIDomainName, DistributionHostedZoneId]
+  
+  RootAPIDomain:
+        DependsOn: RootAPIDomainName
+        Type: 'AWS::Route53::RecordSetGroup'
+        Properties:
+            HostedZoneName:
+                Fn::Join: [ '', [ Ref: RootUrl, '.' ] ]
+            RecordSets:
+            - Name: 
+                Ref: RootUrl
+              Type: A
+              AliasTarget:
+                DNSName:
+                    Fn::GetAtt: [RootAPIDomainName, DistributionDomainName]
+                HostedZoneId:
+                    Fn::GetAtt: [RootAPIDomainName, DistributionHostedZoneId]
+  
+  RootStaticAssetsBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: !Ref RootUrl
+            WebsiteConfiguration:
+                RedirectAllRequestsTo:
+                    Protocol: https
+                    HostName: !Ref RootUrl
+    
+  StaticAssetsBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: 
+                Fn::Join: [ '', [ Ref: ServiceSubDomainName, '.',Ref: RootUrl] ]
+            WebsiteConfiguration:
+                RedirectAllRequestsTo:
+                    Protocol: https
+                    HostName: 
+                        Fn::Join: [ '', [ Ref: ServiceSubDomainName, '.',Ref: RootUrl] ]
 Outputs:
   APIDomainName:
     Description: 'API domain name'
