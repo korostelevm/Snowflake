@@ -36,16 +36,13 @@
 </head>
 
 <body>
-  <div id='snowflake'></div>
+  <div id='ui-container'></div>
   <script>
       var script = document.createElement('script'); 
-      script.src = 'http://localhost:1111/app.js';
+      script.src = '/public/microfrontend.js';
       document.head.appendChild(script);
-      document.getElementById('snowflake').appendChild(document.createElement('snowflake-ui'));
+      document.getElementById('ui-container').appendChild(document.createElement('snowflake-ui'));
   </script>
-  <!-- <script type="module">
-    
-  </script> -->
 </body>
 
 

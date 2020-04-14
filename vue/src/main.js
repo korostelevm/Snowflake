@@ -7,7 +7,7 @@ import vueCustomElement from 'vue-custom-element'
 
 Vue.use(vueCustomElement);
 
-Vue.prototype.$api = 'http://localhost:3000/'
+Vue.prototype.$api = 'http://localhost:3000'
 
 Vue.prototype.$dispatch = function(channel,o){
   window.dispatchEvent(new CustomEvent(`microfrontend:${channel}`, {
@@ -15,11 +15,18 @@ Vue.prototype.$dispatch = function(channel,o){
   }));
 }
 
+
 Vue.mixin({
-  data: function() {
-    return {
-      auth:JSON.parse(sessionStorage.getItem('currentUser'))
-    }
+  methods: {
+    get_auth_header: function() {
+      try{
+        var user = JSON.parse(sessionStorage.getItem('user'))
+        return user.id_token
+      }catch(e){
+        console.warn(e)
+        return null
+      }
+    },
   }
 })
 
