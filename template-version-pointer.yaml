@@ -20,14 +20,14 @@ Resources:
     Properties:
         Stage: Prod
         DomainName: !Ref RootUrl
-        RestApiId: !Ref ServiceApi
+        RestApiId: !Ref RestApiId
 
   APIBasePathMapping:
     Type: 'AWS::ApiGateway::BasePathMapping'
     Properties:
       Stage: Prod
       DomainName: !Ref APIDomainName
-      RestApiId: !Ref ServiceApi
+      RestApiId: !Ref RestApiId
 Outputs:
   APIDomainName:
     Description: 'API domain name'
