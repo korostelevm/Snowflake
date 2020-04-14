@@ -1,37 +1,37 @@
 {
-  "name": "app",
-  "version": "0.1.0",
-  "private": true,
+  "name": "aws-serverless-express-example",
+  "version": "2.1.1",
+  "description": "Example application for running a Node Express app on AWS Lambda using Amazon API Gateway.",
+  "main": "lambda.js",
   "config": {
-    "bucket": "cold-lambda"
+    "bucket": "",
+    "env": "production",
+    "stage": ""
   },
   "scripts": {
-    "install-all": "npm run install:dev && npm run install:lambda && npm run install:vue && npm run install:service ",
-    "install:dev": "npm i",
-    "install:service": "cd service && npm i",
-    "install:lambda": "cd ui && npm i",
-    "install:vue": "cd vue_microfrontend && npm i",
-    "start": "concurrently  \"npm run start:shell\"  \"npm run start:microfrontend\"   \"nodemon\"",
-    "start:localhost": "node_modules/http-server/bin/http-server",
+    "install:all": "npm i && concurrently \"cd service && npm i\"  \"cd vue && npm i\"",
+    "build:labmda": "sam build",
+    "build:microfrontend": "rm -rf ./service/public/* && cd vue && ./node_modules/webpack/bin/webpack.js --config ./webpack.config.js -p  && cp ./public/* ../service/public/",
+    "start": "export env=$npm_config_env && concurrently \"npm run start:shell\"  \"npm run start:microfrontend\"  \"nodemon app.local.js\"",
     "start:shell": "sleep 3  && open http://localhost:1111/",
-    "start:auth": "cd vue && webpack-dev-server --hot --config ./webpack.dev.js --port 2222",
-    "start:microfrontend": "cd vue_microfrontend && node ./node_modules/@vue/cli-service/bin/vue-cli-service.js serve --port 1111",
-    "build": "./build_before",
-    "deploy": "npm run build && npm run deploy:package && npm run deploy:deploy",
-    "deploy:package": "sam package --template-file template.yaml --use-json --s3-bucket $npm_package_config_bucket --s3-prefix ${PWD##*/} --output-template-file ${PWD##*/}.json",
-    "deploy:deploy": "sam deploy --template-file ${PWD##*/}.json --stack-name ${PWD##*/} --capabilities CAPABILITY_IAM "
+    "start:microfrontend": "cd vue && node ./node_modules/@vue/cli-service/bin/vue-cli-service.js serve --port 1111",
+    "deploy": "./deploy.sh $npm_config_bucket"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "aws-serverless-express": "^3.3.8",
+    "body-parser": "^1.17.1",
+    "compression": "^1.6.2",
+    "cors": "^2.8.3",
+    "express": "^4.15.2",
+    "concurrently": "^5.1.0",
+    "faker": "^4.1.0",
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0",
+    "mongodb": "^3.5.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.3",
-    "@babel/plugin-syntax-dynamic-import": "7.0.0",
-    "@babel/preset-env": "^7.4.3",
-    "body-parser": "^1.19.0",
-    "concurrently": "4.0.1",
-    "express": "^4.17.1",
-    "http-server": "^0.11.1",
-    "nodemon": "^1.19.2",
-    "webpack": "^4.39.3",
-    "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.8.0"
+    "nodemon": "^2.0.2",
+    "webpack-cli": "^3.3.11"
   }
 }

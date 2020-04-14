@@ -1,46 +1,30 @@
-const AWS = require('aws-sdk');
-var _ = require('lodash')
-var moment = require('moment');
-const handlers = require('./handlers')
+'use strict'
+const awsServerlessExpress = require(process.env.NODE_ENV === 'test' ? '../../index' : 'aws-serverless-express')
+const app = require('./app')
 
-var respond = function(payload,code){
-    let headers = {
-        "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type,Content-Encoding,Accept,Accept-Language,Content-Language,Cache-Control",
-        'Content-Type': 'application/json'
-    }
-    headers = _.assign(headers, payload.response_headers)
-    return {
-        'statusCode': code,
-        'headers': headers,
-        'body': JSON.stringify(payload.body)
-    }
-}
+// NOTE: If you get ERR_CONTENT_DECODING_FAILED in your browser, this is likely
+// due to a compressed response (e.g. gzip) which has not been handled correctly
+// by aws-serverless-express and/or API Gateway. Add the necessary MIME types to
+// binaryMimeTypes below, then redeploy (`npm run package-deploy`)
+const binaryMimeTypes = [
+  'application/javascript',
+  'application/json',
+  'application/octet-stream',
+  'application/xml',
+  'font/eot',
+  'font/opentype',
+  'font/otf',
+  'image/jpeg',
+  'image/png',
+  'image/svg+xml',
+  'text/comma-separated-values',
+  'text/css',
+  'text/html',
+  'text/javascript',
+  'text/plain',
+  'text/text',
+  'text/xml'
+]
+const server = awsServerlessExpress.createServer(app, null, binaryMimeTypes)
 
-
-
-
-lambda_handler = async (event, context) => {
-    
-    if(typeof(event.headers['x-status'])!='undefined' || event.httpMethod == 'OPTIONS')
-        return respond('OK',200)
-    
-    var res,resource
-    var body = {}
-    if(event.body){
-        body = JSON.parse(event.body)
-    }
-
-    if(event.pathParameters){   
-        resource = event.pathParameters.resource
-        method = event.pathParameters.method
-        res = await handlers[resource][method](body)
-    }
-    
-    return respond( res, res.statusCode ? res.statusCode : 200)
-};
-
-module.exports = {
-    lambda_handler
-}
+exports.handler = (event, context) => awsServerlessExpress.proxy(server, event, context)
