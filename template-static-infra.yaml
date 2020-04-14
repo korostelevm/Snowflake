@@ -34,7 +34,7 @@ Resources:
     Type: 'AWS::ApiGateway::DomainName'
     Properties:
       SecurityPolicy: TLS_1_2
-      CertificateArn: !Ref RootSslCert
+      CertificateArn: !Ref SslCert
       DomainName:
         Fn::Join: [ '', [ Ref: ServiceSubDomainName, Ref: Namespace, '.', Ref: RootUrl ] ]
   
