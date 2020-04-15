@@ -157,5 +157,7 @@ $RECYCLE.BIN/
 AskService.json
 # End of https://www.gitignore.io/api/osx,node,linux,windows
 Snowflake.json
-git.json
-scrap/*
+.env.json
+.env.json
+ExpressLambda.json
+template-api-built.yaml

@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Parameters:
+  RootUrl:
+    Type: String
+    Default: '{{resolve:ssm:/account/root-url:1}}'
+  RestApiId:
+    Type: String
+    Default: production
+  CreateMapping:
+    Type: String
+    Default: 'true'
+  APIDomainName:
+    Type: String
+    Default: ""
+Resources:
+  
+  RootAPIBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+        Stage: Prod
+        DomainName: !Ref RootUrl
+        RestApiId: !Ref RestApiId
+
+  APIBasePathMapping:
+    Type: 'AWS::ApiGateway::BasePathMapping'
+    Properties:
+      Stage: Prod
+      DomainName: !Ref APIDomainName
+      RestApiId: !Ref RestApiId
+Outputs:
+  APIDomainName:
+    Description: 'API domain name'
+    Value: !Ref APIDomainName
