@@ -208,48 +208,23 @@
 
     
     function render() {
-      var time = Date.now() * 0.00005;
-      for ( var i = 0; i < scene.children.length; i ++ ) {
-        // console.log(controls.movele)
-        if(controls.moveLeft){
-          cube.rotation.y -= 0.01 
-        }
-        if(controls.moveRight){
-          cube.rotation.y += 0.01
-        }
-        if(controls.moveForward){
-          // var delta = 0.1
-          // velocity.x -= velocity.x * 10.0 * delta;
-          // velocity.z -= velocity.z * 10.0 * delta;
-          // velocity.y = 0
-          // // velocity.y -= 100.0 * delta; // 100.0 = mass
-          // direction.z = Number( controls.moveForward ) - Number( controls.moveBackward );
-          // direction.x = Number( controls.moveRight ) - Number( controls.moveLeft );
-          // direction.normalize(); // this ensures consistent movements in all directions
-    
-          // if ( controls.moveForward || controls.moveBackward ) velocity.z -= direction.z * 400.0 * delta;
-          // if ( controls.moveLeft || controls.moveRight ) velocity.x -= direction.x * 400.0 * delta;
-          console.log(Math.sin(cube.rotation.y), Math.cos(cube.rotation.y))
-          cube.position.x += 1 * Math.sin(cube.rotation.y)
-          cube.position.z += 1 * Math.cos(cube.rotation.y)
-
-        }
-        if(controls.moveBackward){
-          cube.position.x -= 1 * Math.sin(cube.rotation.y)
-          cube.position.z -= 1 * Math.cos(cube.rotation.y)
-        }
-        
-        var object = scene.children[ i ];
-
-        if ( object instanceof THREE.Points ) {
-          object.rotation.y = time * ( i < 4 ? i + 1 : - ( i + 1 ) ) ;
-        }
-
+      if(controls.moveLeft){
+        cube.rotation.y -= 0.04 
       }
-      
+      if(controls.moveRight){
+        cube.rotation.y += 0.04
+      }
+      if(controls.moveForward){
+        cube.position.x += 4 * Math.sin(cube.rotation.y) 
+        cube.position.z += 4 * Math.cos(cube.rotation.y)
+      }
+      if(controls.moveBackward){
+        cube.position.x -= 4 * Math.sin(cube.rotation.y)
+        cube.position.z -= 4 * Math.cos(cube.rotation.y)
+      }
+    
       camera.position.x += ( mouseX - camera.position.x ) * 0.05;
       camera.position.y += ( - mouseY - camera.position.y + windowHalfY ) * 0.05;
-      // camera.lookAt( scene.position );
       camera.lookAt(new THREE.Vector3(0,500,0));
       renderer.render( scene, camera );
     }
