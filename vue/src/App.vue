@@ -16,6 +16,9 @@
         class='content'
       > 
       <Content/>
+      <Game
+      v-if="game"
+      />
       </div>
         
     </div>
@@ -32,9 +35,15 @@ export default {
       show_snowflake=false;
       EventBus.$emit('snow')
     }
+    var game = false;
+    if(window.location.hash=='#game'){
+      show_snowflake=false;
+      game=true;
+    }
     return {
           init:false,
-          show_snowflake:show_snowflake
+          show_snowflake:show_snowflake,
+          game:game
           }
   },
   mounted:function(){
