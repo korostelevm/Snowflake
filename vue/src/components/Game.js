@@ -1,6 +1,6 @@
 
     import * as THREE from 'three';
-
+    import { EventBus } from '../EventBus.js';
     export var snow = function(){
 
 
@@ -200,12 +200,17 @@
         // console.log()
         
       }else if (cube.position.y > 5 || (Math.abs(cube.position.x) > 550 || Math.abs(cube.position.z) > 550) ){
+
         cube.position.y += v.y 
         v.y -= g;
       }else{
         cube.position.y = 5
         // if(cube.position.x > )
         v.y = 0
+      }
+      if(Math.abs(cube.position.x) > 550 || Math.abs(cube.position.z) > 550){
+        EventBus.$emit('lost')
+
       }
       // Math.sin(cube.rotation.y) 
       // c.rotation.x = (cube.position.y - 5)/500 * Math.cos(cube.rotation.y) 

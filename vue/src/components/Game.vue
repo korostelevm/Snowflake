@@ -1,6 +1,9 @@
 <template>
   <div>
   <div id="instructions">use arrow keys, spacebar</div>
+  <div 
+  v-if="lost"
+  id="you_lose">YOU LOSE</div>
   <div id="main"></div>
   </div>
 </template>
@@ -14,12 +17,16 @@ export default {
   data() {
     return {
           g:null,
+          lost:false
           }
   },
   mounted(){
     this.g = snow()
     this.g.init()
     this.g.animate()  
+    EventBus.$on('lost',()=>{
+      this.lost = true;
+    })
   },
   methods: {
        users: function(d) {
@@ -56,5 +63,16 @@ left:0;
   position: fixed;
   top: 0;
   left:0;
+}
+#you_lose{
+    z-index: 10;
+    position: fixed;
+    /* top: 0; */
+    left: 0;
+    margin: auto;
+    font-weight: bold;
+    font-size: 18vw;
+    color: white;
+    right: 0;
 }
 </style>
