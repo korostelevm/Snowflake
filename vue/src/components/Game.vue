@@ -1,6 +1,6 @@
 <template>
   <div>
-  <div id="instructions">use arrow keys</div>
+  <div id="instructions">use arrow keys, spacebar</div>
   <div id="main"></div>
   </div>
 </template>
