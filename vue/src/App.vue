@@ -36,7 +36,7 @@ export default {
       EventBus.$emit('snow')
     }
     var game = false;
-    if(window.location.hash=='#game'){
+    if(window.location.hash=='#icecube' || window.location.hash=='#game'){
       show_snowflake=false;
       game=true;
     }
