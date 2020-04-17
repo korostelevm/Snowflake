@@ -208,7 +208,7 @@
         // if(cube.position.x > )
         v.y = 0
       }
-      if(Math.abs(cube.position.x) > 550 || Math.abs(cube.position.z) > 550){
+      if(cube.position.y < -100){
         EventBus.$emit('lost')
 
       }
