@@ -178,7 +178,8 @@
     var spherical = new THREE.Spherical();
     var targetQuaternion = new THREE.Quaternion();
     var clock = new THREE.Clock();
-    var speed = 2;
+    var max_speed = 10;
+    var speed = max_speed;
     var prevTime = performance.now();
     function render() {
       var time = performance.now();
@@ -189,8 +190,8 @@
       if(controls.c){
       }
 
-      // cube.lookAt(new THREE.Vector3(0,0,0))
       var g = 2.8 *100 * delta
+      var friction = 0.08 *100 * delta
       if(controls.jump && cube.position.y < jump_height){
         v.y = 20
         cube.position.y += v.y
@@ -200,12 +201,10 @@
         // console.log()
         
       }else if (cube.position.y > 5 || (Math.abs(cube.position.x) > 550 || Math.abs(cube.position.z) > 550) ){
-
         cube.position.y += v.y 
         v.y -= g;
-      }else{
+      }else{ 
         cube.position.y = 5
-        // if(cube.position.x > )
         v.y = 0
       }
       if(cube.position.y < -100){
@@ -236,6 +235,11 @@
 
       // p.normalize()
 
+      v.x = speed * Math.sin(cube.rotation.y) 
+      v.z = speed * Math.cos(cube.rotation.y)
+      cube.position.x += v.x
+      cube.position.z += v.z
+      
       if(Object.values(controls).some((i)=>{return i})){
         // console.log(9.8 * 100.0 * delta)
         console.log(v.y)
@@ -251,14 +255,17 @@
       
       
       if(controls.moveForward){
-        cube.position.x += 4 * Math.sin(cube.rotation.y) 
-        cube.position.z += 4 * Math.cos(cube.rotation.y)
+        speed = max_speed
       }
       if(controls.moveBackward){
-        cube.position.x -= 4 * Math.sin(cube.rotation.y)
-        cube.position.z -= 4 * Math.cos(cube.rotation.y)
+        speed -= friction * 2;
       }
-    
+      if(speed > 0){
+        speed -= friction;
+      }else{
+        speed = 0
+      }
+
       camera.position.x += ( mouseX - camera.position.x ) * 0.05;
       camera.position.y += ( - mouseY - camera.position.y + windowHalfY ) * 0.05;
       camera.lookAt(new THREE.Vector3(0,500,0));
