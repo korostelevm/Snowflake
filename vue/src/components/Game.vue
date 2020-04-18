@@ -3,7 +3,7 @@
   <div id="instructions">use arrow keys, spacebar</div>
   <div 
   v-if="lost"
-  id="you_lose">YOU LOSE</div>
+  id="you_lose">ICED</div>
   <div id="main"></div>
   </div>
 </template>
