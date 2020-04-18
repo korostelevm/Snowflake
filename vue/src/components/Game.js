@@ -2,6 +2,8 @@
     import * as THREE from 'three';
     import { EventBus } from '../EventBus.js';
     import { add_lights } from './ice_cube/lights.js'
+    import { Refractor } from './ice_cube/Refractor.js'
+    import { WaterRefractionShader } from './ice_cube/WaterRefractionShader.js'
 
     export var snow = function(){
 
@@ -19,9 +21,12 @@
 
     var cube;
     var arrowHelper
+    var clock
+    var refractor
+    var dudvMap
     
     var init  = function () {
-
+      clock = new THREE.Clock();
       camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 2000 );
       camera.position.y = 1000;
       camera.position.z = 1000;
@@ -33,7 +38,7 @@
 
       var plane_g = new THREE.PlaneBufferGeometry( 1000, 1000 );
       var material = new THREE.MeshStandardMaterial( {
-        roughness: 0.8,
+        roughness: 0.1,
         color: 0x00aaff,
         metalness: 0.2,
         bumpScale: 0.0005
@@ -53,27 +58,44 @@
         map: null,
         color: 0x00ccff,
         // metalness: 1,
-        roughness: 0.3,
-        opacity: 0.8,
-        side: THREE.FrontSide,
+        // roughness: 0.1,
+        opacity: 0.3,
+        // side: THREE.FrontSide,
         transparent: true,
         // envMapIntensity: 5,
-        envMapIntensity: 10,
+        // envMapIntensity: 10,
         // premultipliedAlpha: true
         // TODO: Add custom blend mode that modulates background color by this materials color.
       } );
       
+      // var material = new THREE.MeshStandardMaterial( { color: 0x6083c2 } );
+      
+
       var c = new THREE.Mesh( geometry, material );
+
+      var geometry = new THREE.BoxGeometry( 97, 97, 97 );
+      geometry.translate(0,56,0)
+      var d = new Refractor( geometry, {
+        color: 0x999999,
+        // shader: WaterRefractionShader
+      } );
+      d.castShadow=true;
+
+
       c.name = 'a'
       c.castShadow=true;
-      c.receiveShadow=true;
-      
+      // c.receiveShadow=true;
       var axesHelper = new THREE.AxesHelper( 500 );
       cube.add( axesHelper );
       var axesHelper = new THREE.AxesHelper( 200 );
       c.add( axesHelper );
       cube.add(c)
+      c.add(d)
       scene.add( cube );
+
+
+
+
       // var dir = new THREE.Vector3( 0, 0, 1 );
 
       // //normalize the direction vector (convert to vector of length 1)
@@ -190,11 +212,6 @@
       if(controls.jump && cube.position.y < jump_height){
         v.y = 20
         cube.position.y += v.y
-        // c.rotation.x += v.y/100
-        // cube.rotateX(-0.1)
-        // console.log(cube.worldToLocal(cube.position), cube.position)
-        // console.log()
-        
       }else if (cube.position.y > 5 || (Math.abs(cube.position.x) > 550 || Math.abs(cube.position.z) > 550) ){
         cube.position.y += v.y 
         v.y -= g;
@@ -206,29 +223,7 @@
         EventBus.$emit('lost')
 
       }
-      // Math.sin(cube.rotation.y) 
-      // c.rotation.x = (cube.position.y - 5)/500 * Math.cos(cube.rotation.y) 
       c.rotation.x = - (cube.position.y - 5)/800 
-      // spherical.theta = Math.random() * Math.PI * 2;
-      // spherical.phi = Math.acos( ( 2 * Math.random() ) - 1 );
-      // spherical.radius = 2;
-
-      
-      // if(controls.moveLeft){
-      //   p.x += 0.1
-      // }
-      // if(controls.moveRight){
-      //   p.x -= 0.1
-      // }
-      
-      // if(controls.moveForward){
-      //   p.z += 0.1
-      // }
-      // if(controls.moveBackward){
-      //   p.z -= 0.1
-      // }
-
-      // p.normalize()
 
       v.x = speed * Math.sin(cube.rotation.y) 
       v.z = speed * Math.cos(cube.rotation.y)
@@ -263,11 +258,13 @@
 
       
 
-      camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+      camera.position.x += ( mouseX - camera.position.x ) * 0.05 
       camera.position.y += ( - mouseY - camera.position.y + windowHalfY ) * 0.05;
+      // camera.lookAt(new THREE.Vector3(0,20,0));
       camera.lookAt(new THREE.Vector3(0,20,0));
       renderer.render( scene, camera );
       prevTime = time;
+
     }
 
 
