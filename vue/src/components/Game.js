@@ -1,8 +1,9 @@
 
     import * as THREE from 'three';
     import { EventBus } from '../EventBus.js';
-    export var snow = function(){
+    import { add_lights } from './ice_cube/lights.js'
 
+    export var snow = function(){
 
     var camera, scene, renderer, materials = [], parameters, ice;
     var mouseX = 0, mouseY = 0, mouseZ=100;
@@ -15,9 +16,9 @@
       moveLeft: false,
       moveRight: false
     };
+
     var cube;
     var arrowHelper
-
     
     var init  = function () {
 
@@ -26,34 +27,17 @@
       camera.position.z = 1000;
       
       scene = new THREE.Scene();
-      scene.add( new THREE.AmbientLight( 0x666666 ) );
-      // scene.fog = new THREE.FogExp2( 0x000000, 0.0004 );
 
-      var dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
-      dirLight.color.setHSL( 0.1, 1, 0.95 );
-      dirLight.position.set( - 500, 500, 500 );
-      
-      dirLight.castShadow = true;
-      
-      dirLight.shadow.mapSize.width = 2048;
-      dirLight.shadow.mapSize.height = 2048;
-      
-      var d = 500;
-      
-      dirLight.shadow.camera.left = - d;
-      dirLight.shadow.camera.right = d;
-      dirLight.shadow.camera.top = d;
-      dirLight.shadow.camera.bottom = - d;
-      
-      dirLight.shadow.camera.far = 1500;
-      dirLight.shadow.bias = - 0.0001;
-      
-      // var dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 10 );
-      // scene.add( dirLightHeper );
-				scene.add( dirLight );
+      add_lights(scene)
+
 
       var plane_g = new THREE.PlaneBufferGeometry( 1000, 1000 );
-      var material = new THREE.MeshLambertMaterial( {color: 0x00aaff, side: THREE.DoubleSide} );
+      var material = new THREE.MeshStandardMaterial( {
+        roughness: 0.8,
+        color: 0x00aaff,
+        metalness: 0.2,
+        bumpScale: 0.0005
+      } );
       var plane = new THREE.Mesh( plane_g, material );
       plane.rotation.x = - Math.PI / 2;
       plane.position.y = 0;
@@ -63,7 +47,22 @@
       cube = new THREE.Object3D()
       var geometry = new THREE.BoxGeometry( 100, 100, 100 );
       geometry.translate(0,55,0)
-      var material = new THREE.MeshLambertMaterial( {color: 0x00ccff} );
+      // var material = new THREE.MeshLambertMaterial( {color: 0x00ccff} );
+
+      var material = new THREE.MeshStandardMaterial( {
+        map: null,
+        color: 0x00ccff,
+        // metalness: 1,
+        roughness: 0.3,
+        opacity: 0.8,
+        side: THREE.FrontSide,
+        transparent: true,
+        // envMapIntensity: 5,
+        envMapIntensity: 10,
+        // premultipliedAlpha: true
+        // TODO: Add custom blend mode that modulates background color by this materials color.
+      } );
+      
       var c = new THREE.Mesh( geometry, material );
       c.name = 'a'
       c.castShadow=true;
@@ -173,11 +172,7 @@
     }
 
     var jump_height = 400;
-    var rotationMatrix = new THREE.Matrix4();
     var v = new THREE.Vector3(0,0,1)
-    var spherical = new THREE.Spherical();
-    var targetQuaternion = new THREE.Quaternion();
-    var clock = new THREE.Clock();
     var max_speed = 10;
     var speed = max_speed;
     var prevTime = performance.now();
@@ -207,7 +202,7 @@
         cube.position.y = 5
         v.y = 0
       }
-      if(cube.position.y < -100){
+      if(cube.position.y < -5000){
         EventBus.$emit('lost')
 
       }
@@ -239,7 +234,7 @@
       v.z = speed * Math.cos(cube.rotation.y)
       cube.position.x += v.x
       cube.position.z += v.z
-      
+
       if(Object.values(controls).some((i)=>{return i})){
         // console.log(9.8 * 100.0 * delta)
         console.log(v.y)
@@ -266,9 +261,11 @@
         speed = 0
       }
 
+      
+
       camera.position.x += ( mouseX - camera.position.x ) * 0.05;
       camera.position.y += ( - mouseY - camera.position.y + windowHalfY ) * 0.05;
-      camera.lookAt(new THREE.Vector3(0,500,0));
+      camera.lookAt(new THREE.Vector3(0,20,0));
       renderer.render( scene, camera );
       prevTime = time;
     }
