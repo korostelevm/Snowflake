@@ -31,8 +31,11 @@
 
       console.log(scene)
       add_lights(scene)
-      
+
       cube = new Cube('a')
+      cube.position.x = 180
+      cube.rotation.y = 0.2
+      scene.add(new Cube('b'))
       scene.add(cube)
 
       
