@@ -27,7 +27,7 @@
     
     var init  = function () {
       clock = new THREE.Clock();
-      camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 2000 );
+      camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 5000 );
       camera.position.y = 1000;
       camera.position.z = 1000;
       
@@ -71,17 +71,17 @@
       } );
 
       // var material = new THREE.MeshStandardMaterial( { color: 0x6083c2 } );
-      // mapHeight.wrapS = THREE.RepeatWrapping;
-      // mapHeight.wrapT = THREE.RepeatWrapping;
+      mapHeight.wrapS = THREE.RepeatWrapping;
+      mapHeight.wrapT = THREE.RepeatWrapping;
       mapHeight.repeat.x = 0.3;
       mapHeight.repeat.y = 0.3;
-      mapHeight.anisotropy = 1;
+      mapHeight.anisotropy = 100;
 
       var material = new THREE.MeshPhysicalMaterial( {
         // color: 0x00ccff,
-        // metalness: 0.0,
+        metalness: 0.0,
         // roughness: 0.1,
-        transparency:0.8,
+        transparency:0.6,
         opacity: 1,
         transparent: true,
         clearcoat: 1.0,
@@ -105,9 +105,9 @@
       c.castShadow=true;
       // c.receiveShadow=true;
       var axesHelper = new THREE.AxesHelper( 500 );
-      cube.add( axesHelper );
+      // cube.add( axesHelper );
       var axesHelper = new THREE.AxesHelper( 200 );
-      c.add( axesHelper );
+      // c.add( axesHelper );
       cube.add(c)
       c.add(d)
       scene.add( cube );
