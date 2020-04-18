@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
 export var add_lights = function(scene){
-    scene.add( new THREE.AmbientLight( 0xaaaaaa ) );
-    scene.fog = new THREE.FogExp2( 0x000000, 0.0004 );
+    scene.add( new THREE.AmbientLight( 0xffffff ) );
+    // scene.fog = new THREE.FogExp2( 0x000000, 0.0004 );
    
     // var dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
     // dirLight.color.setHSL( 0.1, 1, 0.95 );
@@ -28,7 +28,19 @@ export var add_lights = function(scene){
     pointLight.shadow.mapSize.width = 2048;
     pointLight.shadow.mapSize.height = 2048;
     pointLight.shadow.camera.far = 2500;
-    pointLight.position.set( -500, 1000, 200 );
+    pointLight.position.set( -500, 1000, 1000 );
+    var sphereSize = 20;
+    var pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
+    
+    scene.add( pointLight );
+    
+    var pointLight = new THREE.PointLight( 0xffffff, 1, 100000, 40);
+    // pointLight.castShadow=true;
+    pointLight.shadow.radius  = 10
+    pointLight.shadow.mapSize.width = 2048;
+    pointLight.shadow.mapSize.height = 2048;
+    pointLight.shadow.camera.far = 2500;
+    pointLight.position.set( -500, 500, 1000 );
     var sphereSize = 20;
     var pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
     

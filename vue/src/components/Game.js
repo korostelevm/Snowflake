@@ -38,10 +38,10 @@
 
       var plane_g = new THREE.PlaneBufferGeometry( 1000, 1000 );
       var material = new THREE.MeshStandardMaterial( {
-        roughness: 0.1,
+        roughness: 1.1,
         color: 0x00aaff,
         metalness: 0.2,
-        bumpScale: 0.0005
+        bumpScale: 1.5
       } );
       var plane = new THREE.Mesh( plane_g, material );
       plane.rotation.x = - Math.PI / 2;
@@ -53,23 +53,42 @@
       var geometry = new THREE.BoxGeometry( 100, 100, 100 );
       geometry.translate(0,55,0)
       // var material = new THREE.MeshLambertMaterial( {color: 0x00ccff} );
-
+      var mapHeight = new THREE.TextureLoader().load( "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waterdudv.jpg" );
       var material = new THREE.MeshStandardMaterial( {
         map: null,
         color: 0x00ccff,
         // metalness: 1,
         // roughness: 0.1,
         opacity: 0.3,
-        // side: THREE.FrontSide,
+        side: THREE.FrontSide,
         transparent: true,
+        bumpMap: mapHeight,
+        bumpScale: 50.5
         // envMapIntensity: 5,
         // envMapIntensity: 10,
         // premultipliedAlpha: true
         // TODO: Add custom blend mode that modulates background color by this materials color.
       } );
-      
+
       // var material = new THREE.MeshStandardMaterial( { color: 0x6083c2 } );
-      
+      // mapHeight.wrapS = THREE.RepeatWrapping;
+      // mapHeight.wrapT = THREE.RepeatWrapping;
+      mapHeight.repeat.x = 0.3;
+      mapHeight.repeat.y = 0.3;
+      mapHeight.anisotropy = 1;
+
+      var material = new THREE.MeshPhysicalMaterial( {
+        // color: 0x00ccff,
+        // metalness: 0.0,
+        // roughness: 0.1,
+        transparency:0.8,
+        opacity: 1,
+        transparent: true,
+        clearcoat: 1.0,
+        normalMap: mapHeight,
+        // y scale is negated to compensate for normal map handedness.
+        clearcoatNormalScale: new THREE.Vector2( 2.0, - 2.0 )
+      } );
 
       var c = new THREE.Mesh( geometry, material );
 
