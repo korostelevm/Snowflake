@@ -64,8 +64,8 @@ export class Cube {
         c.castShadow=true;
         // c.receiveShadow=true;
         // var axesHelper = new THREE.AxesHelper( 500 );
-        cube.add( axesHelper );
-        var axesHelper = new THREE.AxesHelper( 200 );
+        // cube.add( axesHelper );
+        // var axesHelper = new THREE.AxesHelper( 200 );
         // c.add( axesHelper );
         cube.add(c)
         c.add(d)
