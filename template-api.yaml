@@ -50,6 +50,257 @@ Resources:
             RestApiId: !Ref ServiceApi
             Path: /{proxy+}
             Method: ANY
+
+  SocketConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+        - AttributeName: "connectionId"
+          AttributeType: "S"
+        - 
+          AttributeName: UserId
+          AttributeType: S
+        -
+          AttributeName: ts
+          AttributeType: N
+        KeySchema:
+        - AttributeName: "connectionId"
+          KeyType: "HASH"
+        GlobalSecondaryIndexes:
+          -
+            IndexName: UserIdIndex
+            KeySchema:
+              - 
+                  AttributeName: UserId
+                  KeyType: HASH
+              -
+                  AttributeName: ts
+                  KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        SSESpecification:
+          SSEEnabled: True
+        TableName: !Join [ '', [ 'SocketConnections'] ]
+  
+  WssAPIBasePathMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    DependsOn:
+      - Stage
+    Properties:
+        Stage: Prod
+        DomainName: !Ref WssAPIDomainName
+        ApiId: !Ref ServiceWssApi
+  
+  WssAPIDomainName:
+    Type: 'AWS::ApiGatewayV2::DomainName'
+    Properties:
+      DomainName: !Join [ '', [ 'ice-cube-wss.', !Ref RootUrl ] ]
+      DomainNameConfigurations:
+        - EndpointType: REGIONAL
+          CertificateArn: !Ref SslCert
+  
+  
+  WssAPIDomain:
+    Type: AWS::Route53::RecordSetGroup
+    DependsOn: WssAPIDomainName
+    Properties:
+      HostedZoneName: !Join [ '', [ !Ref RootUrl, '.' ] ]
+      RecordSets:
+      - Name: !Ref WssAPIDomainName
+        Type: A
+        AliasTarget:
+            DNSName: !GetAtt [WssAPIDomainName, RegionalDomainName]
+            HostedZoneId: !GetAtt [WssAPIDomainName, RegionalHostedZoneId]
+
+
+  ServiceWssApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: ServiceWssApi
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.message"
+
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ServiceWssApi
+      RouteKey: $connect
+      AuthorizationType: NONE
+      OperationName: ConnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref ConnectInteg
+  ConnectInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ServiceWssApi
+      Description: Connect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnConnectFunction.Arn}/invocations
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ServiceWssApi
+      RouteKey: $disconnect
+      AuthorizationType: NONE
+      OperationName: DisconnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref DisconnectInteg
+  DisconnectInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ServiceWssApi
+      Description: Disconnect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnDisconnectFunction.Arn}/invocations
+  SendRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ServiceWssApi
+      RouteKey: sendmessage
+      AuthorizationType: NONE
+      OperationName: SendRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref SendInteg
+  SendInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ServiceWssApi
+      Description: Send Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SendMessageFunction.Arn}/invocations
+  Deployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+    - ConnectRoute
+    - SendRoute
+    - DisconnectRoute
+    Properties:
+      ApiId: !Ref ServiceWssApi
+
+  Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: Prod
+      Description: Prod Stage
+      DeploymentId: !Ref Deployment
+      ApiId: !Ref ServiceWssApi
+
+  OnConnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: service
+      Handler: wss/wss.on_connect
+      MemorySize: 256
+      Runtime: nodejs10.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Join [ '', [ 'IceCubeSocketConnections'] ]
+          DOMAIN_NAME: !Join [ '', [ 'ice-cube-wss.', !Ref RootUrl ] ]
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Join [ '', [ 'IceCubeSocketConnections'] ]
+      - Statement:
+        - Effect: Allow
+          Action:
+          - 'execute-api:ManageConnections'
+          Resource:
+          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServiceWssApi}/*'
+
+
+
+  OnConnectPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - ServiceWssApi
+      - OnConnectFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref OnConnectFunction
+      Principal: apigateway.amazonaws.com
+
+  OnDisconnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: service
+      Handler: wss/wss.on_disconnect
+      MemorySize: 256
+      Runtime: nodejs10.x
+      Environment:
+        Variables:
+          TodoTable: !Ref TodoTable
+          TABLE_NAME: !Join [ '', [ 'IceCubeSocketConnections'] ]
+          DOMAIN_NAME: !Join [ '', [ 'ice-cube-wss.', !Ref RootUrl ] ]
+      Policies:
+      - Statement:
+          [{
+            "Effect": "Allow",
+            "Action": ['dynamodb:*'],
+            "Resource": "*"
+          }]
+      - DynamoDBCrudPolicy:
+          TableName: !Join [ '', [ 'IceCubeSocketConnections'] ]
+      - Statement:
+        - Effect: Allow
+          Action:
+          - 'execute-api:ManageConnections'
+          Resource:
+          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServiceWssApi}/*'
+
+  OnDisconnectPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - ServiceWssApi
+      - OnDisconnectFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref OnDisconnectFunction
+      Principal: apigateway.amazonaws.com
+
+  SendMessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: service
+      Handler: wss/wss.handler
+      MemorySize: 256
+      Runtime: nodejs10.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Join [ '', [ 'IceCubeSocketConnections'] ]
+          DOMAIN_NAME: !Join [ '', [ 'ice-cube-wss.', !Ref RootUrl ] ]
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Join [ '', [ 'IceCubeSocketConnections'] ]
+      - Statement:
+        - Effect: Allow
+          Action:
+          - 'execute-api:ManageConnections'
+          Resource:
+          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServiceWssApi}/*'
+          
+  SendMessagePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - ServiceWssApi
+      - SendMessageFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref SendMessageFunction
+      Principal: apigateway.amazonaws.com
+  
+
         
 
 Outputs:

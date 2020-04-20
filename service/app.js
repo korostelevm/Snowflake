@@ -8,6 +8,7 @@ const awsServerlessExpressMiddleware = require('aws-serverless-express/middlewar
 const app = express()
 const router = express.Router()
 var AWSXRay = require('aws-xray-sdk');
+
 app.use(AWSXRay.express.openSegment('Snowflake'));
 
 var fs = require('fs')
@@ -23,6 +24,8 @@ router.use(awsServerlessExpressMiddleware.eventContext())
 var mongoClient = require("mongodb").MongoClient;
 
 var db = null;
+
+
 app.use(function(req, res, next){
     if(db){return next()}
 
