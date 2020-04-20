@@ -8,6 +8,7 @@ import vueCustomElement from 'vue-custom-element'
 Vue.use(vueCustomElement);
 
 Vue.prototype.$api = 'http://localhost:3000'
+Vue.prototype.$wss_api = 'ws://localhost:3000'
 
 Vue.prototype.$dispatch = function(channel,o){
   window.dispatchEvent(new CustomEvent(`microfrontend:${channel}`, {

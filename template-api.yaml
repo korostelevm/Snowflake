@@ -4,6 +4,13 @@ Transform: AWS::Serverless-2016-10-31
 Description: Serverless Express Microfrontend
 
 Parameters:
+  RootUrl:
+      Type: String
+      Default: '{{resolve:ssm:/account/root-url:1}}'
+  SslCert: 
+      Type: String
+      Default: '{{resolve:ssm:/account/ssl-cert:1}}'
+
   CosmosDbConnectionString: 
       Type: String
       Default: '{{resolve:ssm:/account/cosmosdb-connection-string:1}}'
@@ -81,7 +88,7 @@ Resources:
               ProjectionType: ALL
         SSESpecification:
           SSEEnabled: True
-        TableName: !Join [ '', [ 'SocketConnections'] ]
+        TableName: !Join [ '', [ 'IceCubeSocketConnections'] ]
   
   WssAPIBasePathMapping:
     Type: AWS::ApiGatewayV2::ApiMapping
@@ -240,7 +247,6 @@ Resources:
       Runtime: nodejs10.x
       Environment:
         Variables:
-          TodoTable: !Ref TodoTable
           TABLE_NAME: !Join [ '', [ 'IceCubeSocketConnections'] ]
           DOMAIN_NAME: !Join [ '', [ 'ice-cube-wss.', !Ref RootUrl ] ]
       Policies:

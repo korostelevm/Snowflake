@@ -72,7 +72,11 @@ router.get('/public/microfrontend.js*', async (req, res) => {
   var module_path = `${__dirname}/${req.path.slice(1)}`
   if(req.apiGateway){
     var umd_module = await fs.readFileSync(module_path)
-    res.send(umd_module.toString().replace(/http:\/\/localhost:3000/g, 'https://'+req.apiGateway.event.headers.Host))
+    res.send(
+      umd_module.toString()
+      .replace(/http:\/\/localhost:3000/g, 'https://'+req.apiGateway.event.headers.Host)
+      .replace(/ws:\/\/localhost:3000/g, 'wss://ice-cube-wss.coldlambda.com')
+    )
   }else{
     res.sendFile(module_path)
   }

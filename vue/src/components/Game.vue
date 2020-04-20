@@ -1,6 +1,9 @@
 <template>
   <div>
   <div id="instructions">use arrow keys, spacebar</div>
+  <SocketObject
+    v-on:message_recieved="handle_socket_object_message"
+  />
   <div 
   v-if="lost"
   id="you_lose">ICED</div>
@@ -29,6 +32,9 @@ export default {
     })
   },
   methods: {
+       handle_socket_object_message: function(d) {
+         console.log(d)
+       },
        users: function(d) {
         return new Promise((resolve,reject)=>{
           // fetch(this.$api + '/users', {
