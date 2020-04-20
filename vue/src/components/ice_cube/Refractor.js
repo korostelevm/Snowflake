@@ -32,8 +32,8 @@ var Refractor = function ( geometry, options ) {
 	options = options || {};
 
 	var color = ( options.color !== undefined ) ? new Color( options.color ) : new Color( 0x7F7F7F );
-	var textureWidth = options.textureWidth || 1048;
-	var textureHeight = options.textureHeight || 1048;
+	var textureWidth = options.textureWidth || 512;
+	var textureHeight = options.textureHeight || 512;
 	var clipBias = options.clipBias || 0.8;
 	var shader = options.shader || Refractor.RefractorShader;
 	var encoding = options.encoding !== undefined ? options.encoding : LinearEncoding;
