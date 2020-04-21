@@ -4,7 +4,7 @@ var _ = require('lodash')
 const ddb = new AWS.DynamoDB.DocumentClient({ 
   region:'us-east-1',
   apiVersion: '2012-08-10' });
-let { TABLE_NAME, DOMAIN_NAME, TodoTable } = process.env;
+let { TABLE_NAME, DOMAIN_NAME } = process.env;
 if(!DOMAIN_NAME){
   DOMAIN_NAME = 'ice-cube-wss.coldlambda.com'
   TABLE_NAME = 'IceCubeSocketConnections'
@@ -16,6 +16,8 @@ var apigwManagementApi  = new AWS.ApiGatewayManagementApi({
 });
 
 var local_ws
+let last_checked = 0
+let connections
 const set_local_ws = function(app){
     var ws = require('express-ws')(app);
     app.ws('/', function(ws, req) { 
@@ -27,7 +29,6 @@ const set_local_ws = function(app){
           } 
         })
         ws.on('message', function(msg) { 
-            console.log(msg)
           handler({     
             queryStringParameters:req.query, 
             requestContext:{
@@ -66,7 +67,7 @@ const post_to_connections_local = async function(connections, post_data){
       })
     })) 
     cleints = clients.filter(w=>{
-      return connections.includes(w.id)
+      return connections.includes(w.id) && w.id != post_data.source
     });
     clients.map(w=>{
       w.send(JSON.stringify(post_data));
@@ -82,12 +83,17 @@ const post_to_connections =  async function(connections, post_data){
   if(!process.env.DOMAIN_NAME){
     return post_to_connections_local(connections, post_data)
   }
-
+//   console.log(JSON.stringify(DOMAIN_NAME,null,2))
+//   console.log(JSON.stringify(connections,null,2))
+  connections.Items = connections.Items.filter((c)=>{
+    return c.connectionId != post_data.source
+  })
   const postCalls = connections.Items.map(async ({ connectionId }) => {
     try {
       await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: JSON.stringify(post_data) }).promise();
 
     } catch (e) {
+    
       if (e.statusCode === 410) {
         console.log(`Found stale connection, disconnecting ${connectionId}`);
         await on_disconnect({
@@ -99,7 +105,7 @@ const post_to_connections =  async function(connections, post_data){
       }
     }
   });
-  console.log('posting to connections: ',postCalls.length)
+//   console.log('posting to connections: ',postCalls.length)
   return Promise.all(postCalls);
 }
 
@@ -112,7 +118,7 @@ const broadcast = async function(post_data){
 }
 
 const send_to_user_connections = async function(user_id, post_data){
- let connections = await ddb.query({
+ connections = await ddb.query({
     TableName:TABLE_NAME, 
     IndexName:'UserIdIndex',
     KeyConditionExpression: 'UserId = :i',
@@ -126,9 +132,8 @@ const send_to_user_connections = async function(user_id, post_data){
 }
 
 const handler = async (event, context) => {
-  console.log(JSON.stringify(event,null,2))
-
   var payload = JSON.parse(event.body);
+  payload.source = event.requestContext.connectionId
   try {
     if (payload.destination.type == 'broadcast'){
       await broadcast(payload)
@@ -160,13 +165,21 @@ const on_connect = async function (event, context) {
       ts: (new Date()).getTime()
     }
   };
+  console.log(putParams)
   await ddb.put(putParams).promise();
-
-  await broadcast({
-    "event":"user_connected",
-    event_ts: (new Date()).getTime(),
-    ...putParams.Item
-  })
+  var item = {
+    TableName: TABLE_NAME,
+    Key: {
+        connectionId: event.requestContext.connectionId,
+    }
+  };
+  var connection = await ddb.get(item).promise()
+  
+//   await broadcast({
+//     "event":"user_connected",
+//     event_ts: (new Date()).getTime(),
+//     ...connection.Item
+//   })
 
   
 
@@ -200,6 +213,7 @@ const on_disconnect = async function (event, context) {
 //   await Promise.all(update_requests)
 //   // need to tell the service that this user has disconnected and put all their tasks back to waiting
   await broadcast({
+    source:event.requestContext.connectionId,
     event:"user_disconnected",
     event_ts: (new Date()).getTime(),
     ...connection.Item

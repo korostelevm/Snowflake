@@ -14,8 +14,9 @@
       windowHalfY: 0,
   }
 
-    
+    var me = Date.now()
     var cube;
+    var cube2;
     var clock
     var scene, camera, renderer
     var w
@@ -35,7 +36,8 @@
       cube = new Cube('a')
       cube.position.x = 180
       cube.rotation.y = 0.2
-      scene.add(new Cube('b'))
+      cube2 = new Cube('b')
+      scene.add(cube2)
       scene.add(cube)
 
       
@@ -61,6 +63,21 @@
     var max_speed = 10;
     var speed = max_speed;
     var prevTime = performance.now();
+    var cube_prev_pos = {}
+    var count = 0
+    EventBus.$on('got_notified',(m)=>{
+      if(!m.body){return}
+      var pos = JSON.parse(m.body)
+      if(pos.user == me){
+        return false
+      }
+      cube2.rotation.x = pos.rx
+      cube2.rotation.y = pos.ry
+      cube2.rotation.z = pos.rz
+      cube2.position.x = pos.x
+      cube2.position.y = pos.y
+      cube2.position.z = pos.z
+      })
     function render() {
       var time = performance.now();
       var delta = ( time - prevTime ) / 1000;
@@ -112,14 +129,38 @@
       }else{
         speed = 0
       }
-
-      
-
+      if(
+        !(count%2) &&(
+         cube_prev_pos.rx != cube.rotation.x 
+        || cube_prev_pos.ry != cube.rotation.y 
+        || cube_prev_pos.rz != cube.rotation.z
+        || cube_prev_pos.x != cube.position.x 
+        || cube_prev_pos.y != cube.position.y 
+        || cube_prev_pos.z != cube.position.z
+        )
+        ){
+        EventBus.$emit('socket_send',{
+          user:me,
+          rx:cube.rotation.x,
+          ry:cube.rotation.y,
+          rz:cube.rotation.z,
+          x: cube.position.x,
+          y: cube.position.y,
+          z: cube.position.z,
+        })
+      }
+      cube_prev_pos.rx = cube.rotation.x
+      cube_prev_pos.ry = cube.rotation.y
+      cube_prev_pos.rz = cube.rotation.z
+      cube_prev_pos.x = cube.position.x
+      cube_prev_pos.y = cube.position.y
+      cube_prev_pos.z = cube.position.z
       camera.position.x += ( controls.mouseX - camera.position.x ) * 0.05 
       camera.position.y += ( - controls.mouseY - camera.position.y + screen.windowHalfY ) * 0.05;
       camera.lookAt(new THREE.Vector3(0,20,0));
       renderer.render( scene, camera );
       prevTime = time;
+      count++;
 
     }
 
