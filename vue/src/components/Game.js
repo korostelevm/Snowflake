@@ -17,6 +17,7 @@
     var me = Date.now()
     var cube;
     var cube2;
+    var lost = false;
     var clock
     var scene, camera, renderer
     var w
@@ -101,7 +102,8 @@
       }
       if(cube.position.y < -5000){
         EventBus.$emit('lost')
-
+        lost = true
+        return;
       }
       c.rotation.x = - (cube.position.y - 5)/800 
 

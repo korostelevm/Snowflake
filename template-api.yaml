@@ -281,6 +281,9 @@ Resources:
       CodeUri: service
       Handler: wss/wss.handler
       MemorySize: 256
+      AutoPublishAlias: live
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 2
       Runtime: nodejs10.x
       Environment:
         Variables:
