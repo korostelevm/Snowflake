@@ -161,3 +161,4 @@ Snowflake.json
 .env.json
 ExpressLambda.json
 template-api-built.yaml
+account/git_access_key.json

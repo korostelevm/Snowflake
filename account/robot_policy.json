@@ -27,6 +27,7 @@
                 "cloudformation:ExecuteChangeSet",
                 "cloudfront:*",
                 "cloudwatch:*",
+                "cassandra:*",
                 "codebuild:*",
                 "cognito-identity:*",
                 "cognito-idp:*",
