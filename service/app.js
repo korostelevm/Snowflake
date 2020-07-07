@@ -12,7 +12,7 @@ var AWSXRay = require('aws-xray-sdk');
 app.use(AWSXRay.express.openSegment('Snowflake'));
 
 var fs = require('fs')
-var models = require('./models/models')
+// var models = require('./models/models')
 
 
 router.use(compression())
@@ -21,19 +21,19 @@ router.use(bodyParser.json())
 router.use(bodyParser.urlencoded({ extended: true }))
 router.use(awsServerlessExpressMiddleware.eventContext())
 
-var mongoClient = require("mongodb").MongoClient;
+// var mongoClient = require("mongodb").MongoClient;
 
-var db = null;
+// var db = null;
 
 
-app.use(function(req, res, next){
-    if(db){return next()}
+// app.use(function(req, res, next){
+//     if(db){return next()}
 
-    return mongoClient.connect(process.env.CosmosDbConnectionString, async function (err, client) {
-      db = client.db('dev');
-      next()
-  })
-})
+//     return mongoClient.connect(process.env.CosmosDbConnectionString, async function (err, client) {
+//       db = client.db('dev');
+//       next()
+//   })
+// })
 
 
 router.get('/', (req, res) => {
@@ -42,10 +42,10 @@ router.get('/', (req, res) => {
 
 
 
-router.post('/users', async (req, res) => {
-  var users = await models.users.get_users(db, req.body)
-  res.json(users)
-})
+// router.post('/users', async (req, res) => {
+//   var users = await models.users.get_users(db, req.body)
+//   res.json(users)
+// })
 
 router.get('/users/:userId', (req, res) => {
   res.json({

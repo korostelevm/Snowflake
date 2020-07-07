@@ -20,7 +20,7 @@ export default {
         this.s = snow()
         this.s.init()
         this.s.animate()  
-        this.users()
+        // this.users()
       }
     })
   },
