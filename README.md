@@ -1,5 +1,5 @@
 ```
-npm run install:all
+npm run install:all 
 ```
 
 create a `.env.json` file with an object containing keys and values for each of the lambda environent variables in `template-api.yaml`
